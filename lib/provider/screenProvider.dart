@@ -8,6 +8,7 @@ class ScreenProvider extends ChangeNotifier {
   String? username;
   String? password;
   String? platformName;
+  bool isLoading = false;
 
 
   updatePasswordVisibility() {
@@ -25,6 +26,11 @@ class ScreenProvider extends ChangeNotifier {
     platformName = data.platformName;
     notifyListeners();
    
+  }
+  isLoadingAuth(bool isLoading){
+    this.isLoading = isLoading;
+    notifyListeners();
+
   }
 
 

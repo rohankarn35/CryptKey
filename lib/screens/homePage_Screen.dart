@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/data/passwordManagerModel.dart';
 import 'package:cryptkey/screens/passwordDetailScreen.dart';
@@ -10,6 +11,7 @@ import 'package:cryptkey/widgets/customDialog_widget.dart';
 import 'package:cryptkey/widgets/customIcon.dart';
 import 'package:cryptkey/widgets/editAccountDialog.dart';
 import 'package:cryptkey/widgets/showConfirmationwidget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -31,9 +33,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    // _canUse();
-
-    // TODO: implement initState
+    
     super.initState();
   }
 
@@ -42,21 +42,33 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 2, 18, 46),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         toolbarHeight: 80,
         backgroundColor: const Color.fromARGB(255, 2, 18, 46),
         actions: [
           GestureDetector(
-            onTap: (){
-              Navigator.push(context, MaterialPageRoute(builder:  (context) => UserPage()));
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => UserPage()));
             },
             child: Padding(
               padding: const EdgeInsets.only(right: 20),
               child: Hero(
                 tag: 'user',
-                child: CircleAvatar(
-                  radius: 25,
-                  backgroundColor: Colors.white,
-                  backgroundImage: AssetImage('assets/icons/bank.png'),
+                child: SizedBox(
+                  height: 40,
+                  width: 40,
+                  child: ClipOval(
+                    child: CachedNetworkImage(
+                      width: 40,
+                      height: 40,
+                      imageUrl: FirebaseAuth.instance.currentUser!.photoURL!,
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) =>
+                              Image.asset('assets/icons/others.png'),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -94,18 +106,23 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             SlidableAction(
                               onPressed: (context) async {
-                                if (await MobileAuth.authenticate()) {
-                                  EditAccountWidget().editAccountWidget(
-                                    context,
-                                    index,
-                                    data[index].platform,
-                                    data[index].platformName,
-                                    data[index].username,
-                                    data[index].password,
-                                  );
-                                } else {
-                                  ToastMessage.showToast(
-                                      "Authentication Failed");
+                                try {
+                                  if (await MobileAuth.authenticate()) {
+                                    EditAccountWidget().editAccountWidget(
+                                      context,
+                                      index,
+                                      data[index].platform,
+                                      data[index].platformName,
+                                      data[index].username,
+                                      data[index].password,
+                                    );
+                                  } else {
+                                    ToastMessage.showToast(
+                                        "Authentication Failed");
+                                  }
+                                } catch (error) {
+                                  print('Error editing account: $error');
+                                  // Handle error, for example show a snackbar
                                 }
                               },
                               backgroundColor: Colors.white,
@@ -114,21 +131,26 @@ class _HomePageState extends State<HomePage> {
                             ),
                             SlidableAction(
                               onPressed: (context) async {
-                                if (await MobileAuth.authenticate()) {
-                                  final bool result = await ShowConfirmationWidget
-                                      .showConfirmationDialog(
-                                          context,
-                                          "Delete Account",
-                                          "Do you want to delete it permanently?");
-                                  if (result) {
-                                    final box = Boxes.getData();
-                                    box.deleteAt(index).then((value) =>
-                                        ToastMessage.showToast(
-                                            "Account Deleted"));
-                                  } else {
-                                    ToastMessage.showToast(
-                                        "Authentication Failed");
+                                try {
+                                  if (await MobileAuth.authenticate()) {
+                                    final bool result = await ShowConfirmationWidget
+                                        .showConfirmationDialog(
+                                            context,
+                                            "Delete Account",
+                                            "Do you want to delete it permanently?");
+                                    if (result) {
+                                      final box = Boxes.getData();
+                                      box.deleteAt(index).then((value) =>
+                                          ToastMessage.showToast(
+                                              "Account Deleted"));
+                                    } else {
+                                      ToastMessage.showToast(
+                                          "Authentication Failed");
+                                    }
                                   }
+                                } catch (error) {
+                                  print('Error deleting account: $error');
+                                  // Handle error, for example show a snackbar
                                 }
                               },
                               backgroundColor: Colors.red,
@@ -166,17 +188,23 @@ class _HomePageState extends State<HomePage> {
                           ),
                           onTap: () async {
                             // Boxes.getData().deleteAt(data[index].key);
-                            // if (await MobileAuth.authenticate()) {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => PasswordDetailsScreen(
-                                          index: index,
-                                        )));
-                            // } else {
-                            //   ToastMessage.showToast("Authentication Failed");
-                            // }
-
+                            try {
+                              if (await MobileAuth.authenticate()) {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            PasswordDetailsScreen(
+                                              index: index,
+                                            )));
+                              } else {
+                                ToastMessage.showToast("Authentication Failed");
+                              }
+                            } catch (error) {
+                              print(
+                                  'Error navigating to password details screen: $error');
+                              // Handle error, for example show a snackbar
+                            }
                             // Boxes.getData().clear();
                           },
                         ),
@@ -198,17 +226,14 @@ class _HomePageState extends State<HomePage> {
         childrenButtonSize: Size(70, 70),
         children: [
           SpeedDialChild(
-            // child: Icon(Icons.add_circle_outline_rounded),
             backgroundColor: Colors.white,
             label: 'Add Existing Password',
             labelStyle: TextStyle(fontSize: 16.0, color: Colors.black),
             onTap: () {
-              // Handle add existing password action
               CustomDialog().showSelfDialog(context);
             },
           ),
           SpeedDialChild(
-            // child: Icon(Icons.add),
             backgroundColor: Colors.white,
             label: 'Add New Password',
             labelStyle: TextStyle(fontSize: 16.0, color: Colors.black),

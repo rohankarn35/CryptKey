@@ -1,9 +1,11 @@
 import 'package:cryptkey/data/passwordManagerModel.dart';
+import 'package:cryptkey/firebase_options.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/provider/widgetProvider.dart';
 import 'package:cryptkey/screens/authenticationPage.dart';
 import 'package:cryptkey/screens/homePage_Screen.dart';
-import 'package:cryptkey/screens/userPage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:path_provider/path_provider.dart';
@@ -12,6 +14,9 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   Hive.registerAdapter(PasswordManagerModelAdapter());
   var directory = await getApplicationDocumentsDirectory();
@@ -24,7 +29,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -32,10 +36,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => WidgetProvider()),
         ChangeNotifierProvider(create: (_) => ScreenProvider()),
       ],
-      child: const MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'CryptKey',
-          home: AuthenticationPage()),
+      child:  MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'CryptKey',
+        home: FirebaseAuth.instance.currentUser != null
+            ? HomePage()
+            : const AuthenticationPage(),
+      ),
     );
   }
 }

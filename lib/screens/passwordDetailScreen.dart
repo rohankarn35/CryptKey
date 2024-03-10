@@ -4,9 +4,9 @@ import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:cryptkey/widgets/customIcon.dart';
 import 'package:cryptkey/widgets/editAccountDialog.dart';
 import 'package:cryptkey/widgets/showConfirmationwidget.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 class PasswordDetailsScreen extends StatefulWidget {
@@ -21,18 +21,13 @@ class PasswordDetailsScreen extends StatefulWidget {
 }
 
 class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
-  bool isVisible = false;
-  @override
-  void initState() {
-    final provider = Provider.of<ScreenProvider>(context, listen: false);
-    provider.getAllFields(widget.index);
-    provider.isVisible = false;
-    // TODO: implement initState
-    super.initState();
-  }
+
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<ScreenProvider>(context, listen: false);
+    provider.getAllFields(widget.index);
+    provider.isVisible = false;
     return Consumer<ScreenProvider>(builder: (context, provider, child) {
       return Scaffold(
         backgroundColor: Color.fromARGB(255, 7, 12, 20),
