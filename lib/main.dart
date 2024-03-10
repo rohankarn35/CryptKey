@@ -1,7 +1,9 @@
 import 'package:cryptkey/data/passwordManagerModel.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/provider/widgetProvider.dart';
+import 'package:cryptkey/screens/authenticationPage.dart';
 import 'package:cryptkey/screens/homePage_Screen.dart';
+import 'package:cryptkey/screens/userPage.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:path_provider/path_provider.dart';
@@ -33,7 +35,7 @@ class MyApp extends StatelessWidget {
       child: const MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'CryptKey',
-          home: HomePage()),
+          home: AuthenticationPage()),
     );
   }
 }

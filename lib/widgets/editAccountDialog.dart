@@ -9,11 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EditAccountWidget {
-  TextEditingController _accountNameEditingController = TextEditingController();
-
-  TextEditingController _passwordEditingController = TextEditingController();
   void editAccountWidget(BuildContext context, int index, String platform,
       String? platformName, String username, String password) async {
+    TextEditingController _accountNameEditingController =
+        TextEditingController(text: username);
+
+    TextEditingController _passwordEditingController = TextEditingController();
     final widgetProvider = Provider.of<WidgetProvider>(context, listen: false);
     widgetProvider.setSliderValue(8);
     return showDialog(

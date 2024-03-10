@@ -63,13 +63,7 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                            if (result) {
                               final box = Boxes.getData();
                         box.deleteAt(widget.index).then((value) =>
-                            Fluttertoast.showToast(
-                                msg: "Account Deleted",
-                                fontSize: 20,
-                                backgroundColor: Colors.white,
-                                textColor: Colors.black,
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM));
+                            ToastMessage.showToast("Account Deleted"));
                         Navigator.pop(context);
                              
                            }

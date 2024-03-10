@@ -3,11 +3,15 @@ import 'dart:io';
 import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/data/passwordManagerModel.dart';
 import 'package:cryptkey/screens/passwordDetailScreen.dart';
+import 'package:cryptkey/screens/userPage.dart';
 import 'package:cryptkey/utils/mobileAuth.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:cryptkey/widgets/customDialog_widget.dart';
 import 'package:cryptkey/widgets/customIcon.dart';
+import 'package:cryptkey/widgets/editAccountDialog.dart';
+import 'package:cryptkey/widgets/showConfirmationwidget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:hive_flutter/adapters.dart';
 
@@ -41,12 +45,20 @@ class _HomePageState extends State<HomePage> {
         toolbarHeight: 80,
         backgroundColor: const Color.fromARGB(255, 2, 18, 46),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: CircleAvatar(
-              radius: 25,
-              backgroundColor: Colors.white,
-              backgroundImage: AssetImage('assets/icons/bank.png'),
+          GestureDetector(
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder:  (context) => UserPage()));
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: Hero(
+                tag: 'user',
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.white,
+                  backgroundImage: AssetImage('assets/icons/bank.png'),
+                ),
+              ),
             ),
           )
         ],
@@ -76,48 +88,98 @@ class _HomePageState extends State<HomePage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15.0),
                       ),
-                      child: ListTile(
-                        leading: Hero(
-                          tag: index,
-                          child: Container(
-                              height: 50,
-                              width: 50,
-                              decoration: BoxDecoration(
+                      child: Slidable(
+                        endActionPane: ActionPane(
+                          motion: StretchMotion(),
+                          children: [
+                            SlidableAction(
+                              onPressed: (context) async {
+                                if (await MobileAuth.authenticate()) {
+                                  EditAccountWidget().editAccountWidget(
+                                    context,
+                                    index,
+                                    data[index].platform,
+                                    data[index].platformName,
+                                    data[index].username,
+                                    data[index].password,
+                                  );
+                                } else {
+                                  ToastMessage.showToast(
+                                      "Authentication Failed");
+                                }
+                              },
+                              backgroundColor: Colors.white,
+                              label: 'Edit',
+                              icon: Icons.edit,
+                            ),
+                            SlidableAction(
+                              onPressed: (context) async {
+                                if (await MobileAuth.authenticate()) {
+                                  final bool result = await ShowConfirmationWidget
+                                      .showConfirmationDialog(
+                                          context,
+                                          "Delete Account",
+                                          "Do you want to delete it permanently?");
+                                  if (result) {
+                                    final box = Boxes.getData();
+                                    box.deleteAt(index).then((value) =>
+                                        ToastMessage.showToast(
+                                            "Account Deleted"));
+                                  } else {
+                                    ToastMessage.showToast(
+                                        "Authentication Failed");
+                                  }
+                                }
+                              },
+                              backgroundColor: Colors.red,
+                              label: 'Delete',
+                              icon: Icons.delete,
+                            ),
+                          ],
+                        ),
+                        child: ListTile(
+                          leading: Hero(
+                            tag: index,
+                            child: Container(
+                                height: 50,
+                                width: 50,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                                child: CustomIcon().customIcon(
+                                    data[index].platform.toLowerCase(), 35)),
+                          ),
+                          title: Text(
+                            data[index].platformName.toString().isNotEmpty
+                                ? data[index].platformName.toString()
+                                : data[index].platform.toString(),
+                            style: const TextStyle(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              child: CustomIcon().customIcon(
-                                  data[index].platform.toLowerCase(), 35)),
-                        ),
-                        title: Text(
-                          data[index].platformName.toString().isNotEmpty
-                              ? data[index].platformName.toString()
-                              : data[index].platform.toString(),
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 23),
-                        ),
-                        subtitle: Text(
-                          data[index].username.toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 13),
-                        ),
-                        onTap: () async {
-                          // Boxes.getData().deleteAt(data[index].key);
-                          if (await MobileAuth.authenticate()) {
+                                fontWeight: FontWeight.bold,
+                                fontSize: 23),
+                          ),
+                          subtitle: Text(
+                            data[index].username.toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                          ),
+                          onTap: () async {
+                            // Boxes.getData().deleteAt(data[index].key);
+                            // if (await MobileAuth.authenticate()) {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => PasswordDetailsScreen(
                                           index: index,
                                         )));
-                          } else {
-                            ToastMessage.showToast("Authentication Failed");
-                          }
+                            // } else {
+                            //   ToastMessage.showToast("Authentication Failed");
+                            // }
 
-                          // Boxes.getData().clear();
-                        },
+                            // Boxes.getData().clear();
+                          },
+                        ),
                       ),
                     ),
                   );
