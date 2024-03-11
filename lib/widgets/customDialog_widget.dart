@@ -1,6 +1,8 @@
 import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/data/passwordManagerModel.dart';
+import 'package:cryptkey/data/uniquePlatforms.dart';
 import 'package:cryptkey/data/uploadToCloud.dart';
+import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/provider/widgetProvider.dart';
 import 'package:cryptkey/utils/passwordGenerator.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
@@ -142,6 +144,7 @@ class CustomDialog {
                                   ToastMessage.showToast(
                                       "Account added and Password Coped to Clipboard");
                                   widgetProvider.selectedValue = null;
+                                  
                                 } else if (widgetProvider.selectedValue !=
                                     "Others") {
                                   final data = PasswordManagerModel(
@@ -172,7 +175,9 @@ class CustomDialog {
                                       gravity: ToastGravity.BOTTOM);
                                 }
                               }
-
+                               final List<String> platforms = UniquePlatforms().uniquePlatforms();
+                               final _screenProvider = Provider.of<ScreenProvider>(context, listen: false);
+                                _screenProvider.setPlatforms(platforms);
                               // final data = PasswordManagerModel(
                               //     platform: platformController.text,
                               //     username: usernameController.text,

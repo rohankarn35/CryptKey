@@ -12,10 +12,10 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class PasswordDetailsScreen extends StatefulWidget {
-  final int index;
+  final String platformName;
   const PasswordDetailsScreen({
     super.key,
-    required this.index,
+    required this.platformName,
   });
 
   @override
@@ -26,60 +26,13 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ScreenProvider>(context, listen: false);
-    provider.getAllFields(widget.index);
+
     provider.isVisible = false;
     return Consumer<ScreenProvider>(builder: (context, provider, child) {
       return Scaffold(
         backgroundColor: Color.fromARGB(255, 7, 12, 20),
         appBar: AppBar(
-          actions: [
-            PopupMenuButton(
-                iconColor: Colors.white,
-                itemBuilder: (context) {
-                  return [
-                    PopupMenuItem(
-                        child: Text("Edit"),
-                        value: "Edit",
-                        onTap: () {
-                          EditAccountWidget().editAccountWidget(
-                            context,
-                            widget.index,
-                            provider.platform!,
-                            provider.platformName!,
-                            provider.username!,
-                            provider.password!,
-                          );
-                        }),
-                    PopupMenuItem(
-                      child: Text("Delete"),
-                      value: "Edit",
-                      onTap: () async {
-                        final bool result =
-                            await ShowConfirmationWidget.showConfirmationDialog(
-                                context,
-                                "Delete Account",
-                                "Do you want to delete it permanently?");
-                        if (result) {
-                          final box = Boxes.getData();
-                          box.deleteAt(widget.index).then((value) =>
-                              ToastMessage.showToast("Account Deleted"));
-                          CloudFirestoreService().clearData();
-                          UploadToCloud().uploadToCloud();
-
-                          Navigator.pop(context);
-                        }
-                      },
-                    ),
-                  ];
-                })
-          ],
-          backgroundColor: const Color.fromARGB(255, 2, 18, 46),
-          leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-          ),
+          backgroundColor: Color.fromARGB(255, 2, 18, 46),
         ),
         body: SingleChildScrollView(
           child: Column(
@@ -91,17 +44,15 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Hero(
-                      tag: widget.index,
-                      child: Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          child: CustomIcon().customIcon(
-                              provider.platform!.toLowerCase(), 60)),
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: CustomIcon()
+                          .customIcon(provider.platform!.toLowerCase(), 60),
                     ),
                     const SizedBox(width: 20),
                     Column(
