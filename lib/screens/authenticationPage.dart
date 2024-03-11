@@ -1,4 +1,5 @@
 import 'package:cryptkey/Firebase/firebaseLogin.dart';
+import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/screens/homePage_Screen.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
@@ -17,7 +18,8 @@ class AuthenticationPage extends StatefulWidget {
 }
 
 class _AuthenticationPageState extends State<AuthenticationPage> {
-  bool _isLoading = false;
+  // bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,18 +89,18 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                             provider.isLoadingAuth(true);
                             try {
                               await LoginService.login();
-                              
-                           
-                              SharedPreferences prefs = await SharedPreferences.getInstance();
+
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
                               prefs.setBool('isFirst', true);
                               if (FirebaseAuth.instance.currentUser != null) {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => const HomePage()));
+                                        builder: (context) =>
+                                            const HomePage()));
                               } else {
                                 ToastMessage.showToast("An error occurred");
-                                
                               }
                             } catch (error) {
                               ToastMessage.showToast("An error occurred ");

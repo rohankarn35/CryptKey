@@ -33,7 +33,7 @@ class ShowConfirmationWidget {
                       message,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 15,
+                        fontSize: message.length > 20 ? 13 : 15,
                       ),
                     ),
                     const SizedBox(height: 20),

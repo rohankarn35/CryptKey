@@ -3,8 +3,6 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-
-String? platformselected;
 class CustomDropDown {
   final List<String> items = [
     'Facebook',
@@ -17,10 +15,9 @@ class CustomDropDown {
     'Bank',
     'Others',
   ];
-  String? selectedValue;
   Widget customDropDown(BuildContext context) {
-    return Consumer(
-      builder: (context, WidgetProvider provider, child) {
+    return Consumer<WidgetProvider>(
+      builder: (context, provider, child) {
         return DropdownButtonHideUnderline(
           child: DropdownButtonHideUnderline(
             child: DropdownButton2<String>(
@@ -52,12 +49,10 @@ class CustomDropDown {
                         ),
                       ))
                   .toList(),
-              value: selectedValue,
+              value: provider.selectedValue,
               onChanged: (value) {
-                selectedValue =
-                    Provider.of<WidgetProvider>(context, listen: false)
-                        .setSelectedValue(value!);
-                platformselected = selectedValue;
+                Provider.of<WidgetProvider>(context, listen: false)
+                    .setSelectedValue(value!);
               },
               buttonStyleData: ButtonStyleData(
                 height: 70,

@@ -1,5 +1,6 @@
 import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/data/passwordManagerModel.dart';
+import 'package:cryptkey/data/uploadToCloud.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/provider/widgetProvider.dart';
 import 'package:cryptkey/utils/passwordGenerator.dart';
@@ -131,6 +132,7 @@ class EditAccountWidget {
                                     Provider.of<ScreenProvider>(context,
                                             listen: false)
                                         .getAllFields(index);
+                                    UploadToCloud().uploadToCloud();
 
                                     Navigator.of(context).pop();
                                   },

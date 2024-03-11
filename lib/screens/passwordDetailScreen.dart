@@ -1,4 +1,6 @@
+import 'package:cryptkey/Firebase/cloudstore.dart';
 import 'package:cryptkey/data/boxes.dart';
+import 'package:cryptkey/data/uploadToCloud.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:cryptkey/widgets/customIcon.dart';
@@ -21,8 +23,6 @@ class PasswordDetailsScreen extends StatefulWidget {
 }
 
 class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
-
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ScreenProvider>(context, listen: false);
@@ -53,17 +53,21 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                     PopupMenuItem(
                       child: Text("Delete"),
                       value: "Edit",
-                      onTap: ()async{
-                        final bool result = await ShowConfirmationWidget.showConfirmationDialog(context, "Delete Account", "Do you want to delete it permanently?");
-                           if (result) {
-                              final box = Boxes.getData();
-                        box.deleteAt(widget.index).then((value) =>
-                            ToastMessage.showToast("Account Deleted"));
-                        Navigator.pop(context);
-                             
-                           }
+                      onTap: () async {
+                        final bool result =
+                            await ShowConfirmationWidget.showConfirmationDialog(
+                                context,
+                                "Delete Account",
+                                "Do you want to delete it permanently?");
+                        if (result) {
+                          final box = Boxes.getData();
+                          box.deleteAt(widget.index).then((value) =>
+                              ToastMessage.showToast("Account Deleted"));
+                          CloudFirestoreService().clearData();
+                          UploadToCloud().uploadToCloud();
 
-                      
+                          Navigator.pop(context);
+                        }
                       },
                     ),
                   ];
@@ -96,15 +100,17 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(50),
                           ),
-                          child: CustomIcon()
-                              .customIcon(provider.platform!.toLowerCase(), 60)),
+                          child: CustomIcon().customIcon(
+                              provider.platform!.toLowerCase(), 60)),
                     ),
                     const SizedBox(width: 20),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                         provider.platformName!.isNotEmpty ? provider.platformName! : provider.platform!,
+                          provider.platformName!.isNotEmpty
+                              ? provider.platformName!
+                              : provider.platform!,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 30,
@@ -169,7 +175,7 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                               color: Colors.white,
                             ),
                             onPressed: () {
-                             provider.updatePasswordVisibility();
+                              provider.updatePasswordVisibility();
                             },
                           ),
                           IconButton(
@@ -178,12 +184,12 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                               color: Colors.white,
                             ),
                             onPressed: () {
-                            Clipboard.setData(
+                              Clipboard.setData(
                                       ClipboardData(text: provider.password!))
-                                  .then((value) => ToastMessage.showToast("Copied to clipboard"))
+                                  .then((value) => ToastMessage.showToast(
+                                      "Copied to clipboard"))
                                   .onError((error, stackTrace) =>
                                       ToastMessage.showToast("Failed to copy"));
-                              
                             },
                           ),
                         ],

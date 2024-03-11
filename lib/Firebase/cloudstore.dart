@@ -8,8 +8,6 @@ class CloudFirestoreService {
       FirebaseFirestore.instance.collection('cryptkey');
   Future<void> addData(FirebaseModel data) async {
     try {
-      ToastMessage.showToast("Uploading to Cloud... ");
-
       final userDocRef =
           _collectionReference.doc(FirebaseAuth.instance.currentUser!.uid);
 
@@ -21,19 +19,25 @@ class CloudFirestoreService {
               ? Map<String, dynamic>.from(existingData)
               : {};
 
-    
-        dataMap[data.id] = {
-          'platform': data.platform,
-          'username': data.username,
-          'password': data.password,
-          'platformName': data.platformName,
-        };
-      
+      dataMap[data.id] = {
+        'platform': data.platform,
+        'username': data.username,
+        'password': data.password,
+        'platformName': data.platformName,
+      };
 
       // Set the updated data back to the user's document
       await userDocRef.set(dataMap);
+    } catch (e) {
+      ToastMessage.showToast("An error occured");
+    }
+  }
 
-      ToastMessage.showToast("Data Uploaded to Cloud");
+  clearData() async {
+    try {
+      final userDocRef =
+          _collectionReference.doc(FirebaseAuth.instance.currentUser!.uid);
+      await userDocRef.delete();
     } catch (e) {
       ToastMessage.showToast("An error occured");
     }

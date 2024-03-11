@@ -1,8 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cryptkey/Firebase/cloudstore.dart';
 import 'package:cryptkey/Firebase/firebaseLogout.dart';
 import 'package:cryptkey/data/boxes.dart';
+import 'package:cryptkey/data/clearHiveData.dart';
+import 'package:cryptkey/data/uploadToHive.dart';
 import 'package:cryptkey/screens/authenticationPage.dart';
+import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:cryptkey/widgets/customTiles.dart';
+import 'package:cryptkey/widgets/showConfirmationwidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,20 +51,20 @@ class _UserPageState extends State<UserPage> {
                 Hero(
                   tag: 'user',
                   child: ClipOval(
-                  child: CachedNetworkImage(
-                    width: 80,
-                    height: 80,
-                    imageUrl: userPhoto,
-                    progressIndicatorBuilder: (context, url, downloadProgress) =>
-                    Image.asset('assets/icons/others.png'),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    child: CachedNetworkImage(
+                      width: 80,
+                      height: 80,
+                      imageUrl: userPhoto,
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) =>
+                              Image.asset('assets/icons/others.png'),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                    ),
                   ),
-                ),
                 ),
                 SizedBox(
                   width: 20,
                 ),
-              
                 Flexible(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.values[2],
@@ -94,8 +99,23 @@ class _UserPageState extends State<UserPage> {
             SizedBox(
               height: 30,
             ),
-            CustomTile().customTile("Clear Data", "Clear all your data",
-                Icons.circle_outlined, () {}),
+            CustomTile().customTile(
+                "Clear Data", "Clear all your data", Icons.circle_outlined,
+                () async {
+              try {
+                final bool result =
+                    await ShowConfirmationWidget.showConfirmationDialog(
+                        context,
+                        "Clear Data",
+                        "Are you sure you want to clear all  data?");
+                if (result) {
+                  await CloudFirestoreService().clearData();
+                  ClearHiveData.clearData();
+                  Navigator.pop(context);
+                  ToastMessage.showToast("Data Cleared");
+                }
+              } catch (e) {}
+            }),
             CustomTile().customTile("Privacy Policy", "App Privacy Policy",
                 Icons.privacy_tip_outlined, () {}),
             CustomTile().customTile("About", "App and Developer Details",
@@ -103,12 +123,18 @@ class _UserPageState extends State<UserPage> {
             Spacer(),
             TextButton(
                 onPressed: () async {
-                  final box = Boxes.getData();  
-                  box.clear();
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                  prefs.clear();
-                  await FirebaseLogout.logout();
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AuthenticationPage()));
+                  if (await ShowConfirmationWidget.showConfirmationDialog(
+                      context, "Logout", "Do you want to logout?")) {
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    prefs.clear();
+                    await FirebaseLogout.logout();
+                    ClearHiveData.clearData();
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AuthenticationPage()));
+                  }
                 },
                 child: Text(
                   "Logout",

@@ -56,6 +56,7 @@ dependencies:
   jumping_dot: ^0.0.6
   shared_preferences: ^2.2.2
   cloud_firestore: ^4.15.8
+  encrypt: ^5.0.3
 
 dev_dependencies:
   flutter_test:

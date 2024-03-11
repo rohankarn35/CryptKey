@@ -15,7 +15,7 @@ class WidgetProvider extends ChangeNotifier {
    setSelectedValue(String value) {
     selectedValue = value;
     notifyListeners();
-    return selectedValue;
+   
   }
     updatePassword(String password){
     newPassword = password;
