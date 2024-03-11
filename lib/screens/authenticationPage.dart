@@ -2,10 +2,12 @@ import 'package:cryptkey/Firebase/firebaseLogin.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/screens/homePage_Screen.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthenticationPage extends StatefulWidget {
   const AuthenticationPage({super.key});
@@ -85,12 +87,19 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                             provider.isLoadingAuth(true);
                             try {
                               await LoginService.login();
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const HomePage(),
-                                ),
-                              );
+                              
+                           
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              prefs.setBool('isFirst', true);
+                              if (FirebaseAuth.instance.currentUser != null) {
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const HomePage()));
+                              } else {
+                                ToastMessage.showToast("An error occurred");
+                                
+                              }
                             } catch (error) {
                               ToastMessage.showToast("An error occurred ");
                             } finally {

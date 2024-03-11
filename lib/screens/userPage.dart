@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryptkey/Firebase/firebaseLogout.dart';
+import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/screens/authenticationPage.dart';
 import 'package:cryptkey/widgets/customTiles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({super.key});
@@ -101,6 +103,10 @@ class _UserPageState extends State<UserPage> {
             Spacer(),
             TextButton(
                 onPressed: () async {
+                  final box = Boxes.getData();  
+                  box.clear();
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  prefs.clear();
                   await FirebaseLogout.logout();
                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AuthenticationPage()));
                 },

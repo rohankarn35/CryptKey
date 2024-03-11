@@ -103,6 +103,7 @@ class CustomDialog {
                                   final box = Boxes.getData();
                                   box.add(data);
                                   data.save();
+                                  
                                   Clipboard.setData(ClipboardData(
                                       text: passwordController.text));
                                   Navigator.pop(context);
