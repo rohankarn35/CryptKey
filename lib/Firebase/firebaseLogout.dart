@@ -2,9 +2,6 @@ import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-
 class FirebaseLogout {
   static Future<void> logout() async {
     try {

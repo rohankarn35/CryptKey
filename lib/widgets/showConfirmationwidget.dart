@@ -23,7 +23,7 @@ class ShowConfirmationWidget {
                   children: [
                     Text(
                       content,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold),

@@ -2,8 +2,6 @@ import 'package:cryptkey/Firebase/cloudstore.dart';
 import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/data/dataEncryption.dart';
 import 'package:cryptkey/data/firebaseModels.dart';
-import 'package:encrypt/encrypt.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class UploadToCloud {
   // Upload to Hive
@@ -23,7 +21,7 @@ class UploadToCloud {
         print("Data uploaded to cloud");
       }
     } catch (e) {
-      print("Error whileuploading to cloud ${e}",);
+      print("Error whileuploading to cloud $e",);
     }
   }
 }

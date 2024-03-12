@@ -12,10 +12,10 @@ import 'package:provider/provider.dart';
 class EditAccountWidget {
   void editAccountWidget(BuildContext context, int index, String platform,
       String? platformName, String username, String password) async {
-    TextEditingController _accountNameEditingController =
+    TextEditingController accountNameEditingController =
         TextEditingController(text: username);
 
-    TextEditingController _passwordEditingController = TextEditingController();
+    TextEditingController passwordEditingController = TextEditingController();
     final widgetProvider = Provider.of<WidgetProvider>(context, listen: false);
     widgetProvider.setSliderValue(8);
     return showDialog(
@@ -53,10 +53,10 @@ class EditAccountWidget {
                             ),
                             const SizedBox(height: 20),
                             CustomTextField.buildTextField(
-                                "Username", _accountNameEditingController),
+                                "Username", accountNameEditingController),
                             const SizedBox(height: 10),
                             CustomTextField.buildTextField(
-                                "Password", _passwordEditingController),
+                                "Password", passwordEditingController),
                             const SizedBox(height: 10),
                             Text(
                               "Generate Password Instead",
@@ -70,7 +70,7 @@ class EditAccountWidget {
                                   widgetProvider.updatePassword(
                                       PasswordGenerator.generatePassword(
                                           value.sliderValue.toInt()));
-                                  _passwordEditingController.text =
+                                  passwordEditingController.text =
                                       value.newPassword!;
                                 },
                                 child: Container(
@@ -80,7 +80,7 @@ class EditAccountWidget {
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: Center(
+                                  child: const Center(
                                     child: Text(
                                       "Generate Password",
                                       style: TextStyle(
@@ -109,15 +109,15 @@ class EditAccountWidget {
                                 // const SizedBox(width: 20),
                                 TextButton(
                                   onPressed: () {
-                                    if (_accountNameEditingController
+                                    if (accountNameEditingController
                                         .text.isNotEmpty) {
                                       username =
-                                          _accountNameEditingController.text;
+                                          accountNameEditingController.text;
                                     }
-                                    if (_passwordEditingController
+                                    if (passwordEditingController
                                         .text.isNotEmpty) {
                                       password =
-                                          _passwordEditingController.text;
+                                          passwordEditingController.text;
                                     }
                                     final data = PasswordManagerModel(
                                       platform: platform,

@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'CryptKey',
         home: FirebaseAuth.instance.currentUser != null
-            ? HomePage()
+            ? const HomePage()
             : const AuthenticationPage(),
       ),
     );

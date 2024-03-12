@@ -1,6 +1,5 @@
 import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/data/passwordManagerModel.dart';
-import 'package:cryptkey/data/uniquePlatforms.dart';
 import 'package:cryptkey/data/uploadToCloud.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/provider/widgetProvider.dart';
@@ -21,8 +20,8 @@ class CustomDialog {
   void showCustomDialog(
     BuildContext context,
   ) async {
-    final _widgetProvider = Provider.of<WidgetProvider>(context, listen: false);
-    _widgetProvider.setSliderValue(8);
+    final widgetProvider = Provider.of<WidgetProvider>(context, listen: false);
+    widgetProvider.setSliderValue(8);
 
     return showDialog<void>(
       context: context,
@@ -59,11 +58,13 @@ class CustomDialog {
                     const SizedBox(
                       height: 10,
                     ),
-                    CustomTextField.buildTextField(
-                        "Specify Platform (if others)", platformController),
-                    const SizedBox(
+                    widgetProvider.isPlatformNameVisible
+                        ? CustomTextField.buildTextField(
+                            "Specify Platform (if others)", platformController)
+                        : Container(),
+                    widgetProvider.isPlatformNameVisible? const SizedBox(
                       height: 10,
-                    ),
+                    ):Container(),
                     CustomTextField.buildTextField(
                         "Username", usernameController),
                     const SizedBox(
@@ -94,7 +95,7 @@ class CustomDialog {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Center(
+                          child: const Center(
                             child: Text(
                               "Generate Password",
                               style: TextStyle(
@@ -113,6 +114,7 @@ class CustomDialog {
                         TextButton(
                             onPressed: () {
                               widgetProvider.selectedValue = null;
+                              widgetProvider.isPlatformNameVisible = false;
 
                               Navigator.pop(context);
                             },
@@ -122,6 +124,7 @@ class CustomDialog {
                             )),
                         TextButton(
                             onPressed: () {
+                              print(passwordController.text);
                               if (widgetProvider.selectedValue != null &&
                                   usernameController.text.isNotEmpty) {
                                 if (widgetProvider.selectedValue == "Others" &&
@@ -129,10 +132,9 @@ class CustomDialog {
                                   final data = PasswordManagerModel(
                                     platform: widgetProvider.selectedValue!,
                                     username: usernameController.text,
-                                    password:
-                                        PasswordGenerator.generatePassword(
-                                            widgetProvider.sliderValue.toInt()),
-                                    platformName: platformController.text,
+                                    password: passwordController.text,
+                                    platformName:
+                                        platformController.text.trim(),
                                   );
                                   final box = Boxes.getData();
                                   box.add(data);
@@ -144,16 +146,15 @@ class CustomDialog {
                                   ToastMessage.showToast(
                                       "Account added and Password Coped to Clipboard");
                                   widgetProvider.selectedValue = null;
-                                  
+                                  widgetProvider.isPlatformNameVisible = false;
                                 } else if (widgetProvider.selectedValue !=
                                     "Others") {
                                   final data = PasswordManagerModel(
                                     platform: widgetProvider.selectedValue!,
                                     username: usernameController.text,
-                                    password:
-                                        PasswordGenerator.generatePassword(
-                                            widgetProvider.sliderValue.toInt()),
-                                    platformName: platformController.text,
+                                    password: passwordController.text,
+                                    platformName:
+                                        platformController.text.trim(),
                                   );
                                   final box = Boxes.getData();
                                   box.add(data);
@@ -165,6 +166,7 @@ class CustomDialog {
                                       "Account added and Password Coped to Clipboard");
                                   UploadToCloud().uploadToCloud();
                                   widgetProvider.selectedValue = null;
+                                  widgetProvider.isPlatformNameVisible = false;
                                 } else {
                                   Fluttertoast.showToast(
                                       msg: "Please specify platform",
@@ -175,9 +177,11 @@ class CustomDialog {
                                       gravity: ToastGravity.BOTTOM);
                                 }
                               }
-                               final List<String> platforms = UniquePlatforms().uniquePlatforms();
-                               final _screenProvider = Provider.of<ScreenProvider>(context, listen: false);
-                                _screenProvider.setPlatforms(platforms);
+
+                              final screenProvider =
+                                  Provider.of<ScreenProvider>(context,
+                                      listen: false);
+                              screenProvider.setPlatforms();
                               // final data = PasswordManagerModel(
                               //     platform: platformController.text,
                               //     username: usernameController.text,

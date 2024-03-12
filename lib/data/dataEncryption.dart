@@ -23,7 +23,7 @@ class DataEncryption {
 
       return encrypted.base64;
     } catch (e) {
-      print("error while encrypting data ${e}");
+      print("error while encrypting data $e");
     }
   }
 
@@ -33,8 +33,12 @@ class DataEncryption {
       String encryptedUsername = encrypt(data.username);
       String encryptedPassword = encrypt(data.password);
       String? encryptedPlatformName;
-      if (data.platformName!.isNotEmpty) {
+      if (data.platformName != null) {
+        if (data.platformName!.isNotEmpty) {
         encryptedPlatformName = encrypt(data.platformName!);
+
+          
+        }
       }
 
       return FirebaseModel(
@@ -44,12 +48,11 @@ class DataEncryption {
           password: encryptedPassword,
           platformName: encryptedPlatformName);
     } catch (e) {
-      print("errpr while encrypting data ${e}");
+      print("errpr while encrypting data $e");
     }
   }
 
-  decrypt(String data) {
-    final plainText = data;
+  String decrypt(String data) {
     int count = 1234;
     String uid = FirebaseAuth.instance.currentUser!.uid;
     String email = FirebaseAuth.instance.currentUser!.email!;
@@ -57,12 +60,12 @@ class DataEncryption {
     String secretkey = uidstring + count.toString() + email.substring(0, 8);
 
     final key = Key.fromUtf8(secretkey);
-    final iv = IV.fromLength(16);
+    final iv = IV(Uint8List.fromList(List.generate(16, (index) => 0)));
 
     final encrypter = Encrypter(AES(key));
 
-    final encrypted = encrypter.encrypt(plainText, iv: iv);
-    final decrypted = encrypter.decrypt(encrypted, iv: iv);
+    final decrypted = encrypter.decrypt64(data, iv: iv);
+
     return decrypted;
   }
 }

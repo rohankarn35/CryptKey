@@ -53,6 +53,13 @@ class CustomDropDown {
               onChanged: (value) {
                 Provider.of<WidgetProvider>(context, listen: false)
                     .setSelectedValue(value!);
+                  if (value == 'Others') {
+                    Provider.of<WidgetProvider>(context, listen: false)
+                        .setPlatformNameVisible(true);
+                  } else {
+                    Provider.of<WidgetProvider>(context, listen: false)
+                        .setPlatformNameVisible(false);
+                  }
               },
               buttonStyleData: ButtonStyleData(
                 height: 70,
@@ -74,16 +81,16 @@ class CustomDropDown {
                   iconEnabledColor: Colors.white.withOpacity(0.3),
                   iconDisabledColor: Colors.white),
               dropdownStyleData: DropdownStyleData(
-                maxHeight: 200,
+                maxHeight: 220,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  color: Colors.black12,
+                  color: const Color.fromARGB(255, 2, 18, 46),
                 ),
                 offset: const Offset(0, 0),
                 scrollbarTheme: ScrollbarThemeData(
-                  radius: const Radius.circular(40),
-                  thickness: MaterialStateProperty.all(6),
-                  thumbVisibility: MaterialStateProperty.all(true),
+                  radius: const Radius.circular(20),
+                  thickness: MaterialStateProperty.all(1),
+                  thumbVisibility: MaterialStateProperty.all(false),
                 ),
               ),
               menuItemStyleData: const MenuItemStyleData(

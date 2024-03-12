@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cryptkey/data/boxes.dart';
+import 'package:cryptkey/data/dataEncryption.dart';
 import 'package:cryptkey/data/passwordManagerModel.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,11 +10,11 @@ class UploadToHive {
   // Upload data to hive
   void uploadDataToHive() async {
     try {
-      final CollectionReference _collectionReference =
+      final CollectionReference collectionReference =
           FirebaseFirestore.instance.collection('cryptkey');
 
       final userDocRef =
-          _collectionReference.doc(FirebaseAuth.instance.currentUser!.uid);
+          collectionReference.doc(FirebaseAuth.instance.currentUser!.uid);
       final userDocSnapshot = await userDocRef.get();
 
       final dynamic existingData = userDocSnapshot.data();
@@ -23,10 +24,16 @@ class UploadToHive {
       final Map<String, dynamic> dataMap =
           Map<String, dynamic>.from(existingData);
       dataMap.forEach((key, value) {
-        final String platform = value['platform'];
-        final String username = value['username'];
-        final String password = value['password'];
-        final String platformName = value['platformName'];
+        final String platform = DataEncryption().decrypt(value['platform']);
+        final String username = DataEncryption().decrypt(value['username']);
+        final String password = DataEncryption().decrypt(value['password']);
+
+        String? platformName;
+
+        if (value['platformName'] != null &&
+            value['platformName'].toString().isNotEmpty) {
+          platformName = DataEncryption().decrypt(value['platformName']);
+        }
 
         final paswordManagerModelData = PasswordManagerModel(
             platform: platform,
@@ -42,7 +49,7 @@ class UploadToHive {
       prefs.setBool('isFirst', false);
       ToastMessage.showToast("Data Updated");
     } catch (e) {
-      print(e);
+      print("error while uploading to hive $e");
     }
   }
 }

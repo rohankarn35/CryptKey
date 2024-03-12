@@ -1,19 +1,23 @@
 import 'package:cryptkey/data/boxes.dart';
+import 'package:cryptkey/data/uniquePlatforms.dart';
 import 'package:flutter/material.dart';
 
 class ScreenProvider extends ChangeNotifier {
-  bool isVisible = false;
-
   String? platform;
   String? username;
   String? password;
   String? platformName;
   bool isLoading = false;
   int count = 0;
+  List<bool> isVisible = [];
 
-  updatePasswordVisibility() {
-    isVisible = !isVisible;
+  updatePasswordVisibility(List<bool> isVisibleList, int index) {
+    isVisible = isVisibleList;
+
+    isVisible[index] = !isVisible[index];
+
     notifyListeners();
+    return isVisible;
   }
 
   getAllFields(int index) {
@@ -35,12 +39,13 @@ class ScreenProvider extends ChangeNotifier {
 
   List<String> get platformsList => _platformsList;
 
-  void setPlatforms(List<String> platformsList) {
+  void setPlatforms() {
+    final List<String> platformsList = UniquePlatforms().uniquePlatforms();
     _platformsList = platformsList;
     notifyListeners();
   }
 
-  void numberOfAccounts(String platform) {
+  int numberOfAccounts(String platform) {
     final box = Boxes.getData();
     count = 0;
     for (var i = 0; i < box.length; i++) {
@@ -51,6 +56,11 @@ class ScreenProvider extends ChangeNotifier {
         count++;
       }
     }
+ 
+
+    return count;
+  }
+  updateui(){
     notifyListeners();
   }
 }

@@ -1,11 +1,9 @@
 import 'package:cryptkey/Firebase/firebaseLogin.dart';
-import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/screens/homePage_Screen.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,7 +26,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Spacer(),
+          const  Spacer(),
             const Text(
               'CryptKey',
               style: TextStyle(
@@ -56,7 +54,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                       const EdgeInsets.only(left: 20, right: 20, bottom: 50),
                   child: provider.isLoading
                       ? OutlinedButton(
-                          onPressed: () {},
+                          onPressed: () async {},
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Colors.white),
                             padding: const EdgeInsets.symmetric(vertical: 15),
@@ -128,7 +126,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                     height: 30,
                                   ),
                                   const SizedBox(width: 10),
-                                  Text(
+                                  const Text(
                                     "Continue with Google",
                                     style: TextStyle(
                                       fontSize: 18,

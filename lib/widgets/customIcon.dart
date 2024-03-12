@@ -1,4 +1,3 @@
-import 'package:cryptkey/widgets/customDropDown_widget.dart';
 import 'package:flutter/material.dart';
 
 class CustomIcon {
@@ -8,7 +7,7 @@ class CustomIcon {
     'x',
     'linkedin',
     'snapchat',
-    'tikTok',
+    'tiktok',
     'google',
     'bank',
     'others',

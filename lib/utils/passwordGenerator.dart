@@ -2,19 +2,19 @@ import 'dart:math';
 
 class PasswordGenerator {
   static String generatePassword(int length) {
-    const _lowercaseLetters = 'abcdefghijklmnopqrstuvwxyz';
-    const _uppercaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const _numbers = '0123456789';
-    const _symbols = '!@#\$%^&*()_+-=[]{}|;:,.<>?';
+    const lowercaseLetters = 'abcdefghijklmnopqrstuvwxyz';
+    const uppercaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const symbols = '!@#\$%^&*()_+-=[]{}|;:,.<>?';
 
-    final _random = Random.secure();
-    final _characters =
-        _lowercaseLetters + _uppercaseLetters + _numbers + _symbols;
+    final random = Random.secure();
+    const characters =
+        lowercaseLetters + uppercaseLetters + numbers + symbols;
 
     String password = '';
 
     for (int i = 0; i < length; i++) {
-      password += _characters[_random.nextInt(_characters.length)];
+      password += characters[random.nextInt(characters.length)];
     }
 
     return password;
