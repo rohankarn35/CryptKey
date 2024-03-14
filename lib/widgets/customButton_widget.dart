@@ -7,9 +7,9 @@ class CustomButton {
       onTap: onPressed,
       child: Container(
         height: 50,
-        width: MediaQuery.of(context).size.width / 2 - 30,
+        width: MediaQuery.of(context).size.width * 0.7,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.6),
+          color: Colors.blue.withOpacity(0.3),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(

@@ -1,5 +1,6 @@
 import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/data/platformData.dart';
+import 'package:cryptkey/data/uploadToCloud.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:cryptkey/widgets/customIcon.dart';
@@ -13,9 +14,11 @@ import 'package:provider/provider.dart';
 
 class PasswordDetailsScreen extends StatefulWidget {
   final String platformName;
+  final int index;
   const PasswordDetailsScreen({
     super.key,
     required this.platformName,
+    required this.index,
   });
 
   @override
@@ -40,9 +43,8 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext _context) {
     return Scaffold(
-        backgroundColor: const Color.fromARGB(255, 7, 12, 20),
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 2, 18, 46),
           leading: IconButton(
@@ -66,15 +68,18 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(50),
+                    Hero(
+                      tag: widget.index.toString(),
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: CustomIcon()
+                            .customIcon(widget.platformName.toLowerCase(), 60),
                       ),
-                      child: CustomIcon()
-                          .customIcon(widget.platformName.toLowerCase(), 60),
                     ),
                     const SizedBox(width: 20),
                     Column(
@@ -144,11 +149,7 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                                   numberofAccounts = ScreenProvider()
                                       .numberOfAccounts(widget.platformName);
                                   if (numberofAccounts == 0) {
-                                    final screenProvider =
-                                        Provider.of<ScreenProvider>(context,
-                                            listen: false);
-                                    screenProvider.setPlatforms();
-                                    Navigator.pop(context);
+                                    Navigator.pop(_context);
                                   }
 
                                   isVisibleList = List.generate(
@@ -156,11 +157,14 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
 
                                   platformIndex = platformData()
                                       .getPlatformData(widget.platformName);
+                                  UploadToCloud().uploadToCloud();
 
                                   provider.updateui();
 
                                   ToastMessage.showToast("User Deleted");
                                 }
+                                UploadToCloud().uploadToCloud();
+                                print(box.length);
                               },
                               icon: Icons.delete,
                               label: "Delete",

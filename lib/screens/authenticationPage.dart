@@ -1,4 +1,5 @@
 import 'package:cryptkey/Firebase/firebaseLogin.dart';
+import 'package:cryptkey/Firebase/userExists.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/screens/homePage_Screen.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
@@ -85,26 +86,28 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                       : OutlinedButton(
                           onPressed: () async {
                             provider.isLoadingAuth(true);
-                            try {
-                              await LoginService.login();
+                            // try {
+                           final UserCredential? credential =    await LoginService.login();
+                            UserExists().checkUserExistence(credential!.user!.uid);
 
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
-                              prefs.setBool('isFirst', true);
-                              if (FirebaseAuth.instance.currentUser != null) {
-                                Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const HomePage()));
-                              } else {
-                                ToastMessage.showToast("An error occurred");
-                              }
-                            } catch (error) {
-                              ToastMessage.showToast("An error occurred ");
-                            } finally {
-                              provider.isLoadingAuth(false);
-                            }
+                            //   SharedPreferences prefs =
+                            //       await SharedPreferences.getInstance();
+                            //   prefs.setBool('isFirst', true);
+                            //   if (FirebaseAuth.instance.currentUser != null) {
+                            //     Navigator.pushReplacement(
+                            //         context,
+                            //         MaterialPageRoute(
+                            //             builder: (context) =>
+                            //                 const HomePage()));
+                            //   } 
+                            //else {
+                            //     ToastMessage.showToast("An error occurred");
+                            //   }
+                            // } catch (error) {
+                            //   ToastMessage.showToast("An error occurred ");
+                            // } finally {
+                            //   provider.isLoadingAuth(false);
+                            // }
                           },
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Colors.white),

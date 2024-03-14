@@ -22,6 +22,7 @@ class LoginService{
     return await FirebaseAuth.instance.signInWithCredential(credential);
   } catch (e) {
       ToastMessage.showToast("An error occured");
+      print("error details ${e}");
 
     return null;
   }

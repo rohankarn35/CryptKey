@@ -53,9 +53,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext _context) {
     return Scaffold(
-        backgroundColor: const Color.fromARGB(255, 2, 18, 46),
         appBar: AppBar(
           automaticallyImplyLeading: false,
           toolbarHeight: 80,
@@ -119,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                           ? Container()
                           : ListTile(
                               leading: Hero(
-                                tag: index,
+                                tag: value.platformsList[index],
                                 child: Container(
                                   height: 50,
                                   width: 50,
@@ -156,7 +155,7 @@ class _HomePageState extends State<HomePage> {
                                             builder: (context) =>
                                                 PasswordDetailsScreen(
                                                   platformName: value
-                                                      .platformsList[index],
+                                                      .platformsList[index],index: index,
                                                 )));
                                   } else {
                                     ToastMessage.showToast(

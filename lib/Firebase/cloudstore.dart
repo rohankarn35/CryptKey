@@ -26,7 +26,6 @@ class CloudFirestoreService {
         'platformName': data.platformName,
       };
 
-      // Set the updated data back to the user's document
       await userDocRef.set(dataMap);
     } catch (e) {
       ToastMessage.showToast("An error occured");

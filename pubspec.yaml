@@ -57,6 +57,7 @@ dependencies:
   shared_preferences: ^2.2.2
   cloud_firestore: ^4.15.8
   encrypt: ^5.0.3
+  animated_text_kit: ^4.2.2
 
 dev_dependencies:
   flutter_test:
