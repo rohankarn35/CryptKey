@@ -3,16 +3,18 @@ import 'dart:typed_data';
 import 'package:cryptkey/data/firebaseModels.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DataEncryption {
-  encrypt(String data) {
+  Future<String> encrypt(String data) async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String pin = prefs.getString('pin') ?? "cryptkey";
       final String plainText = data;
-      int count = 1234;
       String uid = FirebaseAuth.instance.currentUser!.uid;
       String email = FirebaseAuth.instance.currentUser!.email!;
       String uidstring = uid.substring(0, 20);
-      String secretkey = uidstring + count.toString() + email.substring(0, 8);
+      String secretkey = uidstring + pin + email.substring(0, 8);
 
       final key = Key.fromUtf8(secretkey);
       final iv = IV(Uint8List.fromList(List.generate(16, (index) => 0)));
@@ -23,49 +25,77 @@ class DataEncryption {
 
       return encrypted.base64;
     } catch (e) {
-      print("error while encrypting data $e");
+      print("Error while encrypting data: $e");
+      return "";
     }
   }
 
-  encryptData(FirebaseModel data) {
+  Future<FirebaseModel?> encryptData(FirebaseModel data) async {
     try {
-      String encryptedPlatform = encrypt(data.platform);
-      String encryptedUsername = encrypt(data.username);
-      String encryptedPassword = encrypt(data.password);
+      String encryptedPlatform = await encrypt(data.platform);
+      String encryptedUsername = await encrypt(data.username);
+      String encryptedPassword = await encrypt(data.password);
       String? encryptedPlatformName;
-      if (data.platformName != null) {
-        if (data.platformName!.isNotEmpty) {
-        encryptedPlatformName = encrypt(data.platformName!);
-
-          
-        }
+      if (data.platformName != null && data.platformName!.isNotEmpty) {
+        encryptedPlatformName = await encrypt(data.platformName!);
       }
 
       return FirebaseModel(
-          id: data.id,
-          platform: encryptedPlatform,
-          username: encryptedUsername,
-          password: encryptedPassword,
-          platformName: encryptedPlatformName);
+        id: data.id,
+        platform: encryptedPlatform,
+        username: encryptedUsername,
+        password: encryptedPassword,
+        platformName: encryptedPlatformName,
+      );
     } catch (e) {
-      print("errpr while encrypting data $e");
+      print("Error while encrypting data: $e");
+      return null;
     }
   }
 
-  String decrypt(String data) {
-    int count = 1234;
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-    String email = FirebaseAuth.instance.currentUser!.email!;
-    String uidstring = uid.substring(0, 20);
-    String secretkey = uidstring + count.toString() + email.substring(0, 8);
+ Future<String> decrypt(String? data) async {
+    if (data == null) return '';
 
-    final key = Key.fromUtf8(secretkey);
-    final iv = IV(Uint8List.fromList(List.generate(16, (index) => 0)));
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String pin = prefs.getString('pin') ?? "cryptkey";
+      String uid = FirebaseAuth.instance.currentUser!.uid;
+      String email = FirebaseAuth.instance.currentUser!.email!;
+      String uidstring = uid.substring(0, 20);
+      String secretkey = uidstring + pin + email.substring(0, 8);
 
-    final encrypter = Encrypter(AES(key));
+      final key = Key.fromUtf8(secretkey);
+      final iv = IV(Uint8List.fromList(List.generate(16, (index) => 0)));
 
-    final decrypted = encrypter.decrypt64(data, iv: iv);
+      final encrypter = Encrypter(AES(key));
 
-    return decrypted;
+      final decrypted = encrypter.decrypt64(data, iv: iv);
+
+      return decrypted;
+    } catch (e) {
+      print("Error while decrypting data: $e");
+      return "";
+    }
+  }
+
+  String checkDecryption(String pin, String data) {
+    try {
+      String uid = FirebaseAuth.instance.currentUser!.uid;
+      String email = FirebaseAuth.instance.currentUser!.email!;
+      String uidstring = uid.substring(0, 20);
+      String secretkey = uidstring + pin + email.substring(0, 8);
+
+      final key = Key.fromUtf8(secretkey);
+      final iv = IV(Uint8List.fromList(List.generate(16, (index) => 0)));
+
+      final encrypter = Encrypter(AES(key));
+
+      final decrypted = encrypter.decrypt64(data, iv: iv);
+
+      return decrypted;
+    } catch (e) {
+      print("Error while decrypting data: $e");
+      return "";
+    }
   }
 }

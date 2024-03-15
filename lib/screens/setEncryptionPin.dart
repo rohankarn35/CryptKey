@@ -1,19 +1,21 @@
+import 'package:cryptkey/provider/widgetProvider.dart';
 import 'package:cryptkey/widgets/customButton_widget.dart';
 import 'package:cryptkey/widgets/customTextField_widget.dart';
 import 'package:cryptkey/widgets/pinBoxWidget.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SetEncryptionPin extends StatefulWidget {
-  const SetEncryptionPin({super.key});
+  final bool doesExist;
+  const SetEncryptionPin({super.key, required this.doesExist});
 
   @override
   State<SetEncryptionPin> createState() => _SetEncryptionPinState();
 }
 
 class _SetEncryptionPinState extends State<SetEncryptionPin> {
-   late List<FocusNode> focusNodes;
+  late List<FocusNode> focusNodes;
   late List<TextEditingController> controllers;
-
 
   @override
   void initState() {
@@ -39,37 +41,48 @@ class _SetEncryptionPinState extends State<SetEncryptionPin> {
     }
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: Expanded(
-            child: Column(
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.01,
-                ),
-                Text(
-                  "Enter your encryption pin",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25),
-                ),
-                SizedBox(
-                  height: 40,
-                ),
-                PinBox(
-                  controllers: controllers,
-                  focusNodes: focusNodes,
-                ),
-                SizedBox(
-                  height: 40,
-                ),
-                CustomButton().customButton("Done", () { }, context)
-              ],
-            ),
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // SizedBox(
+              //   height: MediaQuery.of(context).size.height * 0.01,
+              // ),
+              Text(
+                widget.doesExist
+                    ? "Enter your Encryption Pin"
+                    : "Set your encryption pin",
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 25),
+              ),
+              const SizedBox(
+                height: 40,
+              ),
+              PinBox(
+                controllers: controllers,
+                focusNodes: focusNodes,
+                doesExist: widget.doesExist,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Consumer<WidgetProvider>(builder: (ctx, provider, child) {
+                return !provider.isPinCorrect
+                    ? const Text(
+                        "Incorrect Pin Entered",
+                        style: TextStyle(color: Colors.red),
+                      )
+                    : const Text("");
+              })
+            ],
           ),
         ),
       ),

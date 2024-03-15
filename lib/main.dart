@@ -1,3 +1,4 @@
+import 'package:cryptkey/data/dataEncryption.dart';
 import 'package:cryptkey/data/passwordManagerModel.dart';
 import 'package:cryptkey/firebase_options.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,12 +26,26 @@ void main() async {
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
   await Hive.openBox<PasswordManagerModel>('cryptoKeyBox');
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final bool isGetStarted = prefs.getBool("isGetStarted") ?? false;
+  final pin = prefs.getString("pin");
 
-  runApp(const MyApp());
+  bool pinExist = true;
+  if (pin == null) {
+    pinExist = false;
+  }
+
+  runApp(MyApp(
+    isGetStarted: isGetStarted,
+    pinexist: pinExist,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isGetStarted;
+  final bool pinexist;
+
+  const MyApp({super.key, required this.isGetStarted, required this.pinexist});
 
   @override
   Widget build(BuildContext context) {
@@ -38,20 +54,23 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => WidgetProvider()),
         ChangeNotifierProvider(create: (_) => ScreenProvider()),
       ],
-      child:  MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'CryptKey',
-        theme: ThemeData(
-          scaffoldBackgroundColor: Color.fromARGB(255, 2, 18, 46),
-        
+      child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'CryptKey',
+          theme: ThemeData(
+            primaryColor: Colors.white,
+            scaffoldBackgroundColor: Color.fromARGB(255, 2, 18, 46),
+          ),
+          home: FirebaseAuth.instance.currentUser != null
+              ? pinexist
+                  ? const HomePage()
+                  :const AuthenticationPage()
+              : isGetStarted
+                  ? const AuthenticationPage()
+                  : const GetStartedPage()
 
-        ),
-        // home: FirebaseAuth.instance.currentUser != null
-        //     ? const HomePage()
-        //     : const AuthenticationPage(),
-
-        home: SetEncryptionPin(),
-      ),
+          // home: SetEncryptionPin(doesExist: true,),
+          ),
     );
   }
 }

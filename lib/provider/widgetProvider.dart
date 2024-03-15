@@ -29,5 +29,11 @@ class WidgetProvider extends ChangeNotifier {
     notifyListeners();
 
   }
+
+  bool isPinCorrect = true;
+  checkisPinCorrect(bool value){
+    isPinCorrect = value;
+    notifyListeners();
+  }
  
 }

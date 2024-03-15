@@ -62,9 +62,11 @@ class CustomDialog {
                         ? CustomTextField.buildTextField(
                             "Specify Platform (if others)", platformController)
                         : Container(),
-                    widgetProvider.isPlatformNameVisible? const SizedBox(
-                      height: 10,
-                    ):Container(),
+                    widgetProvider.isPlatformNameVisible
+                        ? const SizedBox(
+                            height: 10,
+                          )
+                        : Container(),
                     CustomTextField.buildTextField(
                         "Username", usernameController),
                     const SizedBox(
@@ -124,7 +126,6 @@ class CustomDialog {
                             )),
                         TextButton(
                             onPressed: () {
-                              print(passwordController.text);
                               if (widgetProvider.selectedValue != null &&
                                   usernameController.text.isNotEmpty) {
                                 if (widgetProvider.selectedValue == "Others" &&
@@ -163,7 +164,7 @@ class CustomDialog {
                                       text: passwordController.text));
                                   Navigator.pop(context);
                                   ToastMessage.showToast(
-                                      "Account added and Password Coped to Clipboard");
+                                      "Account added");
                                   UploadToCloud().uploadToCloud();
                                   widgetProvider.selectedValue = null;
                                   widgetProvider.isPlatformNameVisible = false;

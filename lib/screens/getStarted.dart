@@ -1,11 +1,28 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:cryptkey/Firebase/cloudstore.dart';
+import 'package:cryptkey/Firebase/dummyTestData.dart';
+import 'package:cryptkey/Firebase/firebaseLogout.dart';
 import 'package:cryptkey/screens/authenticationPage.dart';
 import 'package:cryptkey/widgets/customButton_widget.dart';
+import 'package:cryptkey/widgets/routeBuilder.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class GetStartedPage extends StatelessWidget {
+class GetStartedPage extends StatefulWidget {
   const GetStartedPage({super.key});
 
+  @override
+  State<GetStartedPage> createState() => _GetStartedPageState();
+}
+
+class _GetStartedPageState extends State<GetStartedPage> {
+  @override
+  void initState() {
+    
+    // TODO: implement initState
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,33 +73,16 @@ class GetStartedPage extends StatelessWidget {
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.8,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  prefs.setBool("isGetStarted", true);
+                  if(!context.mounted ) return;
+
+                  
                   Navigator.pushReplacement(
                     context,
-                    PageRouteBuilder(
-                      transitionDuration: Duration(milliseconds: 500),
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          AuthenticationPage(),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        var begin = Offset(0.0, 1.0);
-                        var end = Offset.zero;
-                        var curve = Curves.easeInOutExpo;
-
-                        var tween = Tween(begin: begin, end: end)
-                            .chain(CurveTween(curve: curve));
-
-                        var slideAnimation = animation.drive(tween);
-
-                        return FadeTransition(
-                          opacity: animation,
-                          child: SlideTransition(
-                            position: slideAnimation,
-                            child: child,
-                          ),
-                        );
-                      },
-                    ),
+                    AnimatedRouteBuilder(anotherPage: AuthenticationPage())
+                        .animatedRoute(),
                   );
                 },
                 style: ElevatedButton.styleFrom(

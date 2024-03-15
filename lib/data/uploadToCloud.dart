@@ -4,24 +4,30 @@ import 'package:cryptkey/data/dataEncryption.dart';
 import 'package:cryptkey/data/firebaseModels.dart';
 
 class UploadToCloud {
-  // Upload to Hive
-  uploadToCloud() async {
+  // Upload to Cloud
+  Future<void> uploadToCloud() async {
     try {
       final box = Boxes.getData();
       for (var i = 0; i < box.length; i++) {
         final data = box.getAt(i);
-        final cloudData = FirebaseModel(
+        if (data != null) {
+          final cloudData = FirebaseModel(
             id: i.toString(),
-            platform: data!.platform,
+            platform: data.platform,
             username: data.username,
             password: data.password,
-            platformName: data.platformName);
-        final encryptedCloudData = DataEncryption().encryptData(cloudData);
-        await CloudFirestoreService().addData(encryptedCloudData);
-        print("Data uploaded to cloud");
+            platformName: data.platformName,
+          );
+          final encryptedCloudData =
+              await DataEncryption().encryptData(cloudData);
+          if (encryptedCloudData != null) {
+            await CloudFirestoreService().addData(encryptedCloudData);
+          }
+          print("Data uploaded to cloud");
+        }
       }
     } catch (e) {
-      print("Error whileuploading to cloud $e",);
+      print("Error while uploading to cloud: $e");
     }
   }
 }

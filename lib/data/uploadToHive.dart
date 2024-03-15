@@ -8,48 +8,70 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UploadToHive {
   // Upload data to hive
-  void uploadDataToHive() async {
+  Future<void> uploadDataToHive(bool isDataUploaded) async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final bool hasUploadedData = prefs.getBool('hasUploadedData') ?? false;
+      print(isDataUploaded);
       final CollectionReference collectionReference =
           FirebaseFirestore.instance.collection('cryptkey');
-
       final userDocRef =
           collectionReference.doc(FirebaseAuth.instance.currentUser!.uid);
       final userDocSnapshot = await userDocRef.get();
 
       final dynamic existingData = userDocSnapshot.data();
-      if (existingData == null) {
-        return;
-      }
-      final Map<String, dynamic> dataMap =
-          Map<String, dynamic>.from(existingData);
-      dataMap.forEach((key, value) {
-        final String platform = DataEncryption().decrypt(value['platform']);
-        final String username = DataEncryption().decrypt(value['username']);
-        final String password = DataEncryption().decrypt(value['password']);
 
-        String? platformName;
+      if (!isDataUploaded) {
+        final Map<String, dynamic>? dataMap =
+            existingData != null && existingData is Map
+                ? Map<String, dynamic>.from(existingData)
+                : {};
 
-        if (value['platformName'] != null &&
-            value['platformName'].toString().isNotEmpty) {
-          platformName = DataEncryption().decrypt(value['platformName']);
+        if (dataMap == null ||
+            dataMap.isEmpty ||
+            (dataMap.length == 1 && dataMap.containsKey('dummy'))) {
+          // If dataMap is empty or only contains dummy data, return without uploading
+          return;
         }
 
-        final paswordManagerModelData = PasswordManagerModel(
-            platform: platform,
-            username: username,
-            password: password,
-            platformName: platformName);
-        final box = Boxes.getData();
-        box.add(paswordManagerModelData);
-        paswordManagerModelData.save();
-      });
+        await Future.forEach(dataMap.entries, (entry) async {
+          if (entry.key == 'dummy') return; // Skip dummy data
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setBool('isFirst', false);
-      ToastMessage.showToast("Data Updated");
+          final String? platform =
+              await DataEncryption().decrypt(entry.value['platform']);
+          final String? username =
+              await DataEncryption().decrypt(entry.value['username']);
+          final String? password =
+              await DataEncryption().decrypt(entry.value['password']);
+
+          String? platformName = entry.value['platformName'] != null &&
+                  entry.value['platformName'].toString().isNotEmpty &&
+                  entry.value['platformName'].toString().length > 1
+              ? await DataEncryption().decrypt(entry.value['platformName'])
+              : null;
+
+          if (platform != null && username != null && password != null) {
+            final paswordManagerModelData = PasswordManagerModel(
+              platform: platform,
+              username: username,
+              password: password,
+              platformName: platformName,
+            );
+            final box = Boxes.getData();
+            box.add(paswordManagerModelData);
+            paswordManagerModelData.save();
+          }
+        });
+
+        prefs.setBool('isFirst', false);
+        prefs.setBool('hasUploadedData', true);
+        ToastMessage.showToast("Data Updated");
+      } else {
+        await Future.delayed(Duration(milliseconds: 1000));
+      }
     } catch (e) {
-      print("error while uploading to hive $e");
+      print("Error while uploading to hive: $e");
+      ToastMessage.showToast("Error uploading data to hive");
     }
   }
 }

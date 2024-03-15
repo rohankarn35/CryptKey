@@ -1,8 +1,12 @@
+import 'package:cryptkey/Firebase/cloudstore.dart';
+import 'package:cryptkey/Firebase/dummyTestData.dart';
 import 'package:cryptkey/Firebase/firebaseLogin.dart';
-import 'package:cryptkey/Firebase/userExists.dart';
+import 'package:cryptkey/Firebase/firebaseLogout.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/screens/homePage_Screen.dart';
+import 'package:cryptkey/screens/setEncryptionPin.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
+import 'package:cryptkey/widgets/routeBuilder.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:jumping_dot/jumping_dot.dart';
@@ -18,138 +22,157 @@ class AuthenticationPage extends StatefulWidget {
 
 class _AuthenticationPageState extends State<AuthenticationPage> {
   // bool _isLoading = false;
+  @override
+  void initState() {
+     FirebaseLogout.logout();
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 2, 18, 46),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-          const  Spacer(),
-            const Text(
-              'CryptKey',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 40,
-                fontWeight: FontWeight.w600,
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: const Color.fromARGB(255, 2, 18, 46),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(),
+              const Text(
+                'CryptKey',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 40,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            const Text(
-              'Your Password Manager',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w400,
+              const SizedBox(
+                height: 20,
               ),
-            ),
-            const Spacer(),
-            Consumer<ScreenProvider>(
-              builder: (context, provider, child) {
-                return Padding(
-                  padding:
-                      const EdgeInsets.only(left: 20, right: 20, bottom: 50),
-                  child: provider.isLoading
-                      ? OutlinedButton(
-                          onPressed: () async {},
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.white),
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const SizedBox(width: 10),
-                                  SizedBox(
-                                    height: 30,
-                                    child: JumpingDots(
-                                      color: Colors.white,
-                                      numberOfDots: 3,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                ],
+              const Text(
+                'Your Password Manager',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              const Spacer(),
+              Consumer<ScreenProvider>(
+                builder: (context, provider, child) {
+                  return Padding(
+                    padding:
+                        const EdgeInsets.only(left: 20, right: 20, bottom: 50),
+                    child: provider.isLoading
+                        ? OutlinedButton(
+                            onPressed: () async {},
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.white),
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                          ),
-                        )
-                      : OutlinedButton(
-                          onPressed: () async {
-                            provider.isLoadingAuth(true);
-                            // try {
-                           final UserCredential? credential =    await LoginService.login();
-                            UserExists().checkUserExistence(credential!.user!.uid);
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(width: 10),
+                                    SizedBox(
+                                      height: 30,
+                                      child: JumpingDots(
+                                        color: Colors.white,
+                                        numberOfDots: 3,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        : OutlinedButton(
+                            onPressed: () async {
+                              provider.isLoadingAuth(true);
+                              try {
+                                final UserCredential? credential =
+                                    await LoginService.login();
+                                // UserExists()
+                                //     .checkUserExistence(credential!.user!.uid);
 
-                            //   SharedPreferences prefs =
-                            //       await SharedPreferences.getInstance();
-                            //   prefs.setBool('isFirst', true);
-                            //   if (FirebaseAuth.instance.currentUser != null) {
-                            //     Navigator.pushReplacement(
-                            //         context,
-                            //         MaterialPageRoute(
-                            //             builder: (context) =>
-                            //                 const HomePage()));
-                            //   } 
-                            //else {
-                            //     ToastMessage.showToast("An error occurred");
-                            //   }
-                            // } catch (error) {
-                            //   ToastMessage.showToast("An error occurred ");
-                            // } finally {
-                            //   provider.isLoadingAuth(false);
-                            // }
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.white),
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
+                                SharedPreferences prefs =
+                                    await SharedPreferences.getInstance();
+                                prefs.setBool('isFirst', true);
+                                if (FirebaseAuth.instance.currentUser != null) {
+                                  final bool doesExist =
+                                      await CloudFirestoreService()
+                                          .checkAndAddUser();
+
+                                  if (!context.mounted) return;
+
+                                  Navigator.pushReplacement(
+                                      context,
+                                      AnimatedRouteBuilder(
+                                          anotherPage: SetEncryptionPin(
+                                        doesExist: doesExist,
+                                      )).animatedRoute());
+                                } else {
+                                  ToastMessage.showToast("An error occurred");
+                                }
+                              } catch (error) {
+                                ToastMessage.showToast("An error occurred ");
+                              } finally {
+                                provider.isLoadingAuth(false);
+                              }
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.white),
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
                             ),
-                          ),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const SizedBox(width: 10),
-                                  Image.asset(
-                                    'assets/icons/google.png',
-                                    width: 30,
-                                    height: 30,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Text(
-                                    "Continue with Google",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      letterSpacing: 1.1,
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(width: 10),
+                                    Image.asset(
+                                      'assets/icons/google.png',
+                                      width: 30,
+                                      height: 30,
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 10),
+                                    const Text(
+                                      "Continue with Google",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        letterSpacing: 1.1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                );
-              },
-            ),
-            // const SizedBox(
-            //   height: 40,
-            // ),
-          ],
+                  );
+                },
+              ),
+              // const SizedBox(
+              //   height: 40,
+              // ),
+            ],
+          ),
         ),
       ),
     );

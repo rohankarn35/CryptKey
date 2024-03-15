@@ -4,13 +4,14 @@ import 'package:cryptkey/Firebase/firebaseLogout.dart';
 import 'package:cryptkey/data/clearHiveData.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/screens/authenticationPage.dart';
+import 'package:cryptkey/utils/clearSharedData.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:cryptkey/widgets/customTiles.dart';
+import 'package:cryptkey/widgets/routeBuilder.dart';
 import 'package:cryptkey/widgets/showConfirmationwidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({super.key});
@@ -27,7 +28,7 @@ class _UserPageState extends State<UserPage> {
   Widget build(BuildContext context) {
     final navigation = Navigator.of(context);
     return Consumer<ScreenProvider>(
-      builder: (context, provider, child) {
+      builder: (BuildContext context, provider, child) {
         return Scaffold(
             backgroundColor: const Color.fromARGB(255, 2, 18, 46),
             appBar: AppBar(
@@ -135,16 +136,18 @@ class _UserPageState extends State<UserPage> {
                     onPressed: () async {
                       if (await ShowConfirmationWidget.showConfirmationDialog(
                           context, "Logout", "Do you want to logout?")) {
-                        SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
-                        prefs.clear();
+                        ClearSharedData().clearSharedData();
+
                         await FirebaseLogout.logout();
                         ClearHiveData.clearData();
+                        if (!context.mounted) return;
+
                         Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const AuthenticationPage()));
+                          context,
+                          AnimatedRouteBuilder(
+                                  anotherPage: AuthenticationPage())
+                              .animatedRoute(),
+                        );
                       }
                     },
                     child: const Text(

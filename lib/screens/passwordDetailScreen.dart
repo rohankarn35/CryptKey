@@ -1,3 +1,4 @@
+import 'package:cryptkey/Firebase/cloudstore.dart';
 import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/data/platformData.dart';
 import 'package:cryptkey/data/uploadToCloud.dart';
@@ -10,7 +11,9 @@ import 'package:cryptkey/widgets/showConfirmationwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PasswordDetailsScreen extends StatefulWidget {
   final String platformName;
@@ -30,15 +33,26 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
   bool isVisible = false;
   late List<bool> isVisibleList;
   late int numberofAccounts;
+
+  Future<bool> isFirst() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isFirst') ?? true;
+  }
+
+  Future<void> updateWhileInternetConnection() async {
+    if (!await isFirst() && await InternetConnectionChecker().hasConnection) {
+      CloudFirestoreService().updateWhileInternetConnection();
+    }
+  }
+
   @override
   void initState() {
+    updateWhileInternetConnection();
     WidgetsBinding.instance.addPostFrameCallback((_) {});
     numberofAccounts = ScreenProvider().numberOfAccounts(widget.platformName);
     isVisibleList = List.generate(numberofAccounts, (index) => false);
 
     platformIndex = platformData().getPlatformData(widget.platformName);
-    print(platformIndex);
-    // TODO: implement initState
     super.initState();
   }
 
@@ -95,7 +109,7 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          numberofAccounts.toString(),
+                          "$numberofAccounts Accounts",
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 15,
@@ -132,6 +146,8 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                                     data.platformName,
                                     data.username,
                                     data.password);
+
+                                UploadToCloud().uploadToCloud();
                               },
                               icon: Icons.edit,
                             ),
@@ -148,7 +164,12 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
 
                                   numberofAccounts = ScreenProvider()
                                       .numberOfAccounts(widget.platformName);
+
                                   if (numberofAccounts == 0) {
+                                    if (!_context.mounted) {
+                                      return;
+                                      
+                                    }
                                     Navigator.pop(_context);
                                   }
 
@@ -157,14 +178,11 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
 
                                   platformIndex = platformData()
                                       .getPlatformData(widget.platformName);
-                                  UploadToCloud().uploadToCloud();
 
                                   provider.updateui();
 
                                   ToastMessage.showToast("User Deleted");
                                 }
-                                UploadToCloud().uploadToCloud();
-                                print(box.length);
                               },
                               icon: Icons.delete,
                               label: "Delete",

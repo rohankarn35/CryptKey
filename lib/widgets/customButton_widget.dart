@@ -9,7 +9,7 @@ class CustomButton {
         height: 50,
         width: MediaQuery.of(context).size.width * 0.7,
         decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.3),
+          color: Colors.blue.withOpacity(0.8),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(
