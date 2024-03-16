@@ -5,10 +5,10 @@ class AnimatedRouteBuilder {
   AnimatedRouteBuilder({required this.anotherPage});
   Route<PageRouteBuilder> animatedRoute() {
     return PageRouteBuilder(
-      transitionDuration: Duration(milliseconds: 500),
+      transitionDuration: const Duration(milliseconds: 500),
       pageBuilder: (context, animation, secondaryAnimation) => anotherPage,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        var begin = Offset(0.0, 1.0);
+        var begin = const Offset(0.0, 1.0);
         var end = Offset.zero;
         var curve = Curves.easeInOutExpo;
 

@@ -16,12 +16,12 @@ import 'package:provider/provider.dart';
 class CustomDialog {
   TextEditingController platformController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
   void showCustomDialog(
     BuildContext context,
   ) async {
     final widgetProvider = Provider.of<WidgetProvider>(context, listen: false);
     widgetProvider.setSliderValue(8);
+    widgetProvider.controller.clear();
 
     return showDialog<void>(
       context: context,
@@ -39,10 +39,16 @@ class CustomDialog {
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.only(
+                  top: 20.0, left: 20.0, right: 20.0, bottom: 10.0),
               child: SingleChildScrollView(
+                reverse: true,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  // controller: ScrollController(),
+                  //   scrollDirection: Axis.vertical,
+                  //   keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  // shrinkWrap: true,
                   children: [
                     const Text(
                       "Add New Password",
@@ -73,39 +79,16 @@ class CustomDialog {
                       height: 10,
                     ),
                     CustomTextField.buildTextField(
-                        "Password", passwordController),
+                        "Password", widgetProvider.controller),
                     const SizedBox(
                       height: 10,
                     ),
                     Text(
-                      "Password Length",
+                      "Slide to Generate Password",
                       style: TextStyle(color: Colors.white.withOpacity(0.6)),
                       textAlign: TextAlign.left,
                     ),
                     CustomSlider.customSlider(context),
-                    TextButton(
-                        onPressed: () {
-                          widgetProvider.updatePassword(
-                              PasswordGenerator.generatePassword(
-                                  widgetProvider.sliderValue.toInt()));
-                          passwordController.text = widgetProvider.newPassword!;
-                        },
-                        child: Container(
-                          height: 40,
-                          width: 150,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              "Generate Password",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 2, 18, 46),
-                              ),
-                            ),
-                          ),
-                        )),
                     const SizedBox(
                       height: 10,
                     ),
@@ -133,7 +116,7 @@ class CustomDialog {
                                   final data = PasswordManagerModel(
                                     platform: widgetProvider.selectedValue!,
                                     username: usernameController.text,
-                                    password: passwordController.text,
+                                    password: widgetProvider.controller.text,
                                     platformName:
                                         platformController.text.trim(),
                                   );
@@ -142,7 +125,7 @@ class CustomDialog {
                                   data.save();
 
                                   Clipboard.setData(ClipboardData(
-                                      text: passwordController.text));
+                                      text: widgetProvider.controller.text));
                                   Navigator.pop(context);
                                   ToastMessage.showToast(
                                       "Account added and Password Coped to Clipboard");
@@ -153,7 +136,7 @@ class CustomDialog {
                                   final data = PasswordManagerModel(
                                     platform: widgetProvider.selectedValue!,
                                     username: usernameController.text,
-                                    password: passwordController.text,
+                                    password: widgetProvider.controller.text,
                                     platformName:
                                         platformController.text.trim(),
                                   );
@@ -161,11 +144,9 @@ class CustomDialog {
                                   box.add(data);
                                   data.save();
                                   Clipboard.setData(ClipboardData(
-                                      text: passwordController.text));
+                                      text: widgetProvider.controller.text));
                                   Navigator.pop(context);
-                                  ToastMessage.showToast(
-                                      "Account added");
-                                  UploadToCloud().uploadToCloud();
+                                  ToastMessage.showToast("Account added");
                                   widgetProvider.selectedValue = null;
                                   widgetProvider.isPlatformNameVisible = false;
                                 } else {

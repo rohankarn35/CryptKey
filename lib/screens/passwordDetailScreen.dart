@@ -57,7 +57,8 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
   }
 
   @override
-  Widget build(BuildContext _context) {
+  Widget build(BuildContext context) {
+    final navigation = Navigator.of(context);
     return Scaffold(
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 2, 18, 46),
@@ -66,7 +67,7 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
               final screenProvider =
                   Provider.of<ScreenProvider>(context, listen: false);
               screenProvider.setPlatforms();
-              Navigator.pop(context);
+              navigation.pop();
             },
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
@@ -83,7 +84,7 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Hero(
-                      tag: widget.index.toString(),
+                      tag: widget.platformName,
                       child: Container(
                         width: 100,
                         height: 100,
@@ -166,11 +167,7 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                                       .numberOfAccounts(widget.platformName);
 
                                   if (numberofAccounts == 0) {
-                                    if (!_context.mounted) {
-                                      return;
-                                      
-                                    }
-                                    Navigator.pop(_context);
+                                    navigation.pop();
                                   }
 
                                   isVisibleList = List.generate(

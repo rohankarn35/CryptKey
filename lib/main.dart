@@ -1,4 +1,3 @@
-import 'package:cryptkey/data/dataEncryption.dart';
 import 'package:cryptkey/data/passwordManagerModel.dart';
 import 'package:cryptkey/firebase_options.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
@@ -6,7 +5,6 @@ import 'package:cryptkey/provider/widgetProvider.dart';
 import 'package:cryptkey/screens/authenticationPage.dart';
 import 'package:cryptkey/screens/getStarted.dart';
 import 'package:cryptkey/screens/homePage_Screen.dart';
-import 'package:cryptkey/screens/setEncryptionPin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +57,7 @@ class MyApp extends StatelessWidget {
           title: 'CryptKey',
           theme: ThemeData(
             primaryColor: Colors.white,
-            scaffoldBackgroundColor: Color.fromARGB(255, 2, 18, 46),
+            scaffoldBackgroundColor: const Color.fromARGB(255, 2, 18, 46),
           ),
           home: FirebaseAuth.instance.currentUser != null
               ? pinexist

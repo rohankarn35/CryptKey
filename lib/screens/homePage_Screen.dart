@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryptkey/Firebase/cloudstore.dart';
-import 'package:cryptkey/data/uploadToCloud.dart';
 import 'package:cryptkey/data/uploadToHive.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/screens/passwordDetailScreen.dart';
@@ -13,7 +12,7 @@ import 'package:cryptkey/widgets/customDialog_widget.dart';
 import 'package:cryptkey/widgets/customIcon.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -109,7 +108,7 @@ class _HomePageState extends State<HomePage> {
                           imageUrl: FirebaseAuth.instance.currentUser!.photoURL!,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
-                                  Image.asset('assets/icons/others.png'),
+                                  SvgPicture.asset("assets/icons/others.svg"),
                           errorWidget: (context, url, error) =>
                               const Icon(Icons.error),
                         ),
@@ -132,7 +131,7 @@ class _HomePageState extends State<HomePage> {
           body: Consumer<ScreenProvider>(
             builder: (context, value, child) {
               return value.platformsList.isEmpty
-                  ? Center(
+                  ? const Center(
                       child: Text(
                         "Tap on + icon to add data",
                         style: TextStyle(color: Colors.white),
@@ -156,7 +155,7 @@ class _HomePageState extends State<HomePage> {
                                 ? Container()
                                 : ListTile(
                                     leading: Hero(
-                                      tag: value.platformsList[index],
+                                      tag: value.platformsList[index].toString(),
                                       child: Container(
                                         height: 50,
                                         width: 50,
@@ -183,10 +182,12 @@ class _HomePageState extends State<HomePage> {
                                           color: Colors.white, fontSize: 13),
                                     ),
                                     onTap: () async {
+                                         
                                       // Boxes.getData().deleteAt(data[index].key);
                                       try {
                                         if (await MobileAuth.authenticate(
                                             "Verify to view accounts")) {
+
       
                                               if (!context.mounted) return;
                                                 
@@ -229,7 +230,7 @@ class _HomePageState extends State<HomePage> {
       
                 CustomDialog().showCustomDialog(context);
               } catch (e) {
-                print("floating ${e}");
+                print("floating $e");
               }
             },
             child: const Icon(

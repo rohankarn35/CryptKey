@@ -9,6 +9,7 @@ class CustomDropDown {
     'Instagram',
     'X',
     'LinkedIn',
+    'Github',
     'Snapchat',
     'TikTok',
     'Google',
@@ -62,7 +63,7 @@ class CustomDropDown {
                   }
               },
               buttonStyleData: ButtonStyleData(
-                height: 70,
+                height: 60,
                 padding: const EdgeInsets.only(left: 14, right: 14),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),

@@ -1,6 +1,4 @@
 import 'package:cryptkey/provider/widgetProvider.dart';
-import 'package:cryptkey/widgets/customButton_widget.dart';
-import 'package:cryptkey/widgets/customTextField_widget.dart';
 import 'package:cryptkey/widgets/pinBoxWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -51,9 +49,6 @@ class _SetEncryptionPinState extends State<SetEncryptionPin> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // SizedBox(
-              //   height: MediaQuery.of(context).size.height * 0.01,
-              // ),
               Text(
                 widget.doesExist
                     ? "Enter your Encryption Pin"

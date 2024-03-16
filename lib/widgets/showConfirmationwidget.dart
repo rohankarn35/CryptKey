@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ShowConfirmationWidget {
-  static Future<bool> showConfirmationDialog(
+  static  showConfirmationDialog(
       BuildContext context, String content, String message) async {
-    return await showDialog(
+    return  showDialog(
         context: context,
         builder: (context) {
           return Dialog(

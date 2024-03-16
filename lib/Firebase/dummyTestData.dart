@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cryptkey/Firebase/cloudstore.dart';
 import 'package:cryptkey/data/dataEncryption.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class DummyTestData {
   final CollectionReference _collectionReference =
-      FirebaseFirestore.instance.collection('users');
+      FirebaseFirestore.instance.collection('cryptkey');
 
   Future<void> dummyData(bool doesExist) async {
     // Check if the user is already registered in Firestore

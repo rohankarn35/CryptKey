@@ -1,12 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/data/dataEncryption.dart';
 import 'package:cryptkey/data/firebaseModels.dart';
 import 'package:cryptkey/data/uploadToCloud.dart';
-import 'package:cryptkey/data/uploadToHive.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 class CloudFirestoreService {
   final CollectionReference _collectionReference =

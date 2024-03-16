@@ -10,9 +10,7 @@ class UploadToHive {
   // Upload data to hive
   Future<void> uploadDataToHive(bool isDataUploaded) async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final bool hasUploadedData = prefs.getBool('hasUploadedData') ?? false;
-      print(isDataUploaded);
+ 
       final CollectionReference collectionReference =
           FirebaseFirestore.instance.collection('cryptkey');
       final userDocRef =
@@ -20,15 +18,16 @@ class UploadToHive {
       final userDocSnapshot = await userDocRef.get();
 
       final dynamic existingData = userDocSnapshot.data();
+           SharedPreferences prefs = await SharedPreferences.getInstance();
+      final bool hasUploadedData = prefs.getBool('hasUploadedData') ?? false;
 
-      if (!isDataUploaded) {
-        final Map<String, dynamic>? dataMap =
+      if (!hasUploadedData) {
+        final Map<String, dynamic> dataMap =
             existingData != null && existingData is Map
                 ? Map<String, dynamic>.from(existingData)
                 : {};
 
-        if (dataMap == null ||
-            dataMap.isEmpty ||
+        if (dataMap.isEmpty ||
             (dataMap.length == 1 && dataMap.containsKey('dummy'))) {
           // If dataMap is empty or only contains dummy data, return without uploading
           return;
@@ -37,11 +36,11 @@ class UploadToHive {
         await Future.forEach(dataMap.entries, (entry) async {
           if (entry.key == 'dummy') return; // Skip dummy data
 
-          final String? platform =
+          final String platform =
               await DataEncryption().decrypt(entry.value['platform']);
-          final String? username =
+          final String username =
               await DataEncryption().decrypt(entry.value['username']);
-          final String? password =
+          final String password =
               await DataEncryption().decrypt(entry.value['password']);
 
           String? platformName = entry.value['platformName'] != null &&
@@ -50,24 +49,22 @@ class UploadToHive {
               ? await DataEncryption().decrypt(entry.value['platformName'])
               : null;
 
-          if (platform != null && username != null && password != null) {
-            final paswordManagerModelData = PasswordManagerModel(
-              platform: platform,
-              username: username,
-              password: password,
-              platformName: platformName,
-            );
-            final box = Boxes.getData();
-            box.add(paswordManagerModelData);
-            paswordManagerModelData.save();
-          }
-        });
+          final paswordManagerModelData = PasswordManagerModel(
+            platform: platform,
+            username: username,
+            password: password,
+            platformName: platformName,
+          );
+          final box = Boxes.getData();
+          box.add(paswordManagerModelData);
+          paswordManagerModelData.save();
+                });
 
         prefs.setBool('isFirst', false);
         prefs.setBool('hasUploadedData', true);
         ToastMessage.showToast("Data Updated");
       } else {
-        await Future.delayed(Duration(milliseconds: 1000));
+        await Future.delayed(const Duration(milliseconds: 1000));
       }
     } catch (e) {
       print("Error while uploading to hive: $e");

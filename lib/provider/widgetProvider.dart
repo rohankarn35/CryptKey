@@ -4,6 +4,7 @@ class WidgetProvider extends ChangeNotifier {
  int _sliderValue = 8;
   String? newPassword;
  bool isPlatformNameVisible = false;
+ TextEditingController controller = TextEditingController();
 
   int get sliderValue => _sliderValue;
   int setSliderValue(int value) {
@@ -19,7 +20,7 @@ class WidgetProvider extends ChangeNotifier {
    
   }
     updatePassword(String password){
-    newPassword = password;
+    controller.text = password;
     notifyListeners();
 
   }

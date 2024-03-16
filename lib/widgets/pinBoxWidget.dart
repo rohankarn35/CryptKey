@@ -29,46 +29,47 @@ class _PinBoxState extends State<PinBox> {
   @override
   Widget build(BuildContext context) {
     return ShakeWidget(
-        key: shakeKey,
-        shakeOffset: 10.0,
-        shakeCount: 3,
-        child: Consumer<WidgetProvider>(
-          builder: (context, provider, child) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                4,
-                (index) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  child: SizedBox(
-                    width: 60.0,
-                    height: 60.0,
-                    child: TextField(
-                      cursorColor: Colors.white,
-                      controller: widget.controllers[index],
-                      focusNode: widget.focusNodes[index],
-                      keyboardType: TextInputType.number,
-                      maxLength: 1,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18.0, color: Colors.white),
-                      decoration: InputDecoration(
-                        filled: provider.isPinCorrect,
-                        fillColor: Colors.white.withOpacity(0.1),
-                        enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                            borderSide: provider.isPinCorrect
-                                ? BorderSide.none
-                                : BorderSide(color: Colors.red)),
-                        focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                            borderSide: provider.isPinCorrect
-                                ? BorderSide.none
-                                : BorderSide(color: Colors.red)),
-                        counterText: '',
-                      ),
-                      onChanged: (value) async {
-                        SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
+      key: shakeKey,
+      shakeOffset: 10.0,
+      shakeCount: 3,
+      child: Consumer<WidgetProvider>(
+        builder: (context, provider, child) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(
+              4,
+              (index) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                child: SizedBox(
+                  width: 60.0,
+                  height: 60.0,
+                  child: TextField(
+                    cursorColor: Colors.white,
+                    controller: widget.controllers[index],
+                    focusNode: widget.focusNodes[index],
+                    keyboardType: TextInputType.number,
+                    maxLength: 1,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 18.0, color: Colors.white),
+                    decoration: InputDecoration(
+                      filled: provider.isPinCorrect,
+                      fillColor: Colors.white.withOpacity(0.1),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: provider.isPinCorrect
+                              ? BorderSide.none
+                              : const BorderSide(color: Colors.red)),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: provider.isPinCorrect
+                              ? BorderSide.none
+                              : const BorderSide(color: Colors.red)),
+                      counterText: '',
+                    ),
+                    onChanged: (value) async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      try {
                         if (value.isNotEmpty && index < 3) {
                           widget.focusNodes[index + 1].requestFocus();
                         } else if (value.isEmpty && index > 0) {
@@ -88,15 +89,12 @@ class _PinBoxState extends State<PinBox> {
                                 await CheckPin().checkPin(value);
                             provider.checkisPinCorrect(isPinCorrect);
                             if (provider.isPinCorrect) {
-                              if (!context.mounted) {
-                                return;
-                              }
-                              FocusScope.of(context).requestFocus(FocusNode());
                               if (await MobileAuth.canAuthenticate()) {
                                 if (await MobileAuth.authenticate(
                                     "Setup your biometrics")) {
                                   prefs.setString("pin", value);
-                                  Future.delayed(Duration(milliseconds: 1000))
+                                  Future.delayed(
+                                          const Duration(milliseconds: 1000))
                                       .then((value) => Navigator.push(
                                             context,
                                             MaterialPageRoute(
@@ -110,7 +108,8 @@ class _PinBoxState extends State<PinBox> {
                                 }
                               } else {
                                 prefs.setString("pin", value);
-                                Future.delayed(Duration(milliseconds: 1000))
+                                Future.delayed(
+                                        const Duration(milliseconds: 1000))
                                     .then((value) => Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -121,23 +120,21 @@ class _PinBoxState extends State<PinBox> {
                               }
                             }
                           } else {
+                            FocusScope.of(context).requestFocus(FocusNode());
+
                             String value = widget.controllers[0].text +
                                 widget.controllers[1].text +
                                 widget.controllers[2].text +
                                 widget.controllers[3].text;
                             prefs.setString("pin", value);
                             await DummyTestData().dummyData(widget.doesExist);
-                            if (!context.mounted) {
-                              return;
-                            }
-
-                            FocusScope.of(context).requestFocus(FocusNode());
 
                             if (await MobileAuth.canAuthenticate()) {
                               if (await MobileAuth.authenticate(
                                   "Setup your biometrics")) {
                                 prefs.setString("pin", value);
-                                Future.delayed(Duration(milliseconds: 1000))
+                                Future.delayed(
+                                        const Duration(milliseconds: 1000))
                                     .then((value) => Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
@@ -151,7 +148,7 @@ class _PinBoxState extends State<PinBox> {
                               }
                             } else {
                               prefs.setString("pin", value);
-                              Future.delayed(Duration(milliseconds: 1000))
+                              Future.delayed(const Duration(milliseconds: 1000))
                                   .then((value) => Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
@@ -165,13 +162,18 @@ class _PinBoxState extends State<PinBox> {
                             shakeKey.currentState?.shake();
                           }
                         }
-                      },
-                    ),
+                      } catch (e) {
+                        print("Error: $e");
+                        // Handle errors here
+                      }
+                    },
                   ),
                 ),
               ),
-            );
-          },
-        ));
+            ),
+          );
+        },
+      ),
+    );
   }
 }

@@ -14,29 +14,31 @@ class EditAccountWidget {
       String? platformName, String username, String password) async {
     TextEditingController accountNameEditingController =
         TextEditingController(text: username);
-
-    TextEditingController passwordEditingController = TextEditingController();
     final widgetProvider = Provider.of<WidgetProvider>(context, listen: false);
+
     widgetProvider.setSliderValue(8);
+    widgetProvider.controller.clear();
+
     return showDialog(
         context: context,
         builder: (context) {
           return Dialog(
+              insetAnimationCurve: Curves.easeInCubic,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
               elevation: 0,
               backgroundColor: Colors.transparent,
               child: Container(
-                  decoration: BoxDecoration(
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 2, 18, 46),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
                     color: const Color.fromARGB(255, 2, 18, 46),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 2, 18, 46),
-                      width: 1,
-                    ),
+                    width: 1,
                   ),
-                  child: Padding(
+                ),
+                child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child:
                         SingleChildScrollView(child: Consumer<WidgetProvider>(
@@ -56,7 +58,7 @@ class EditAccountWidget {
                                 "Username", accountNameEditingController),
                             const SizedBox(height: 10),
                             CustomTextField.buildTextField(
-                                "Password", passwordEditingController),
+                                "Password", value.controller),
                             const SizedBox(height: 10),
                             Text(
                               "Generate Password Instead",
@@ -65,30 +67,7 @@ class EditAccountWidget {
                               textAlign: TextAlign.left,
                             ),
                             CustomSlider.customSlider(context),
-                            TextButton(
-                                onPressed: () {
-                                  widgetProvider.updatePassword(
-                                      PasswordGenerator.generatePassword(
-                                          value.sliderValue.toInt()));
-                                  passwordEditingController.text =
-                                      value.newPassword!;
-                                },
-                                child: Container(
-                                  height: 40,
-                                  width: 150,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: const Center(
-                                    child: Text(
-                                      "Generate Password",
-                                      style: TextStyle(
-                                        color: Color.fromARGB(255, 2, 18, 46),
-                                      ),
-                                    ),
-                                  ),
-                                )),
+                           
                             const SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -114,10 +93,9 @@ class EditAccountWidget {
                                       username =
                                           accountNameEditingController.text;
                                     }
-                                    if (passwordEditingController
+                                    if (value.controller
                                         .text.isNotEmpty) {
-                                      password =
-                                          passwordEditingController.text;
+                                      password = value.controller.text;
                                     }
                                     final data = PasswordManagerModel(
                                       platform: platform,
@@ -150,8 +128,8 @@ class EditAccountWidget {
                           ],
                         );
                       },
-                    )),
-                  )));
+                    ))),
+              ));
         });
   }
 }

@@ -117,15 +117,18 @@ class _UserPageState extends State<UserPage> {
                             "Clear Data",
                             "Are you sure you want to clear all  data?");
                     if (result) {
+                      navigation.pop();
+
                       await CloudFirestoreService().clearData();
                       ClearHiveData.clearData();
-                      navigation.pop();
                       provider.setPlatforms();
                       provider.setPlatforms();
 
                       ToastMessage.showToast("Data Cleared");
                     }
-                  } catch (e) {}
+                  } catch (e) {
+                    print(e);
+                  }
                 }),
                 CustomTile().customTile("Privacy Policy", "App Privacy Policy",
                     Icons.privacy_tip_outlined, () {}),
@@ -140,14 +143,14 @@ class _UserPageState extends State<UserPage> {
 
                         await FirebaseLogout.logout();
                         ClearHiveData.clearData();
-                        if (!context.mounted) return;
-
-                        Navigator.pushReplacement(
-                          context,
-                          AnimatedRouteBuilder(
-                                  anotherPage: AuthenticationPage())
-                              .animatedRoute(),
-                        );
+                        if (context.mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            AnimatedRouteBuilder(
+                                    anotherPage: const AuthenticationPage())
+                                .animatedRoute(),
+                          );
+                        }
                       }
                     },
                     child: const Text(

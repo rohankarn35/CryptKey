@@ -1,11 +1,6 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:cryptkey/Firebase/cloudstore.dart';
-import 'package:cryptkey/Firebase/dummyTestData.dart';
-import 'package:cryptkey/Firebase/firebaseLogout.dart';
 import 'package:cryptkey/screens/authenticationPage.dart';
-import 'package:cryptkey/widgets/customButton_widget.dart';
 import 'package:cryptkey/widgets/routeBuilder.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,7 +25,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Spacer(),
+            const Spacer(),
             Image.asset(
               "assets/icons/get.png",
               height: MediaQuery.of(context).size.height * 0.5,
@@ -69,7 +64,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                 speed: const Duration(milliseconds: 100),
               ),
             ]),
-            Spacer(),
+            const Spacer(),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.8,
               child: ElevatedButton(
@@ -81,13 +76,13 @@ class _GetStartedPageState extends State<GetStartedPage> {
                   
                   Navigator.pushReplacement(
                     context,
-                    AnimatedRouteBuilder(anotherPage: AuthenticationPage())
+                    AnimatedRouteBuilder(anotherPage: const AuthenticationPage())
                         .animatedRoute(),
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.blue.withOpacity(0.8),
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.blue.withOpacity(0.8),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

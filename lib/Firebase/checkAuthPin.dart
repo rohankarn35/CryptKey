@@ -4,15 +4,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class CheckPin {
   final CollectionReference _collectionReference =
-      FirebaseFirestore.instance.collection('users');
+      FirebaseFirestore.instance.collection('cryptkey');
 
   Future<bool> checkPin(String pin) async {
     bool isPinCorrect = false;
     try {
       final userDocRef =
           _collectionReference.doc(FirebaseAuth.instance.currentUser!.uid);
+          // print(userDocRef.id);
 
       final userDocSnapshot = await userDocRef.get();
+
+      print(FirebaseAuth.instance.currentUser!.uid);
+      print(userDocSnapshot.data());
 
       final dynamic existingData = userDocSnapshot.data();
       final Map<String, dynamic> dataMap =
@@ -22,13 +26,15 @@ class CheckPin {
 
       final String encryptedCheckPinCorrect = dataMap['dummy']['test'];
       if ("cryptkey" ==
-         await  DataEncryption().checkDecryption(pin, encryptedCheckPinCorrect)) {
+         DataEncryption().checkDecryption(pin, encryptedCheckPinCorrect)) {
         isPinCorrect = true;
       }
       
       return isPinCorrect;
     } catch (e) {
-      print("check pin error: ${e}");
+          print(FirebaseAuth.instance.currentUser!.email);
+
+      print("check pin error: $e");
       return isPinCorrect;
     }
   }

@@ -1,4 +1,5 @@
 import 'package:cryptkey/provider/widgetProvider.dart';
+import 'package:cryptkey/utils/passwordGenerator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,10 +7,8 @@ class CustomSlider {
   static Widget customSlider(BuildContext context) {
     return SliderTheme(
       data: SliderThemeData(
-       
-        valueIndicatorColor:
-            Colors.white.withOpacity(0.3), 
-        inactiveTrackColor: Colors.black, 
+        valueIndicatorColor: Colors.white.withOpacity(0.3),
+        inactiveTrackColor: Colors.black,
         activeTrackColor: Colors.white,
         thumbColor: Colors.white,
       ),
@@ -23,6 +22,8 @@ class CustomSlider {
           label: provider.sliderValue.toString(),
           onChanged: (double value) {
             provider.setSliderValue(value.toInt());
+            Provider.of<WidgetProvider>(context, listen: false).updatePassword(
+                PasswordGenerator.generatePassword(value.toInt()));
           },
         );
       }),

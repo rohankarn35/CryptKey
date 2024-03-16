@@ -1,9 +1,7 @@
 import 'package:cryptkey/Firebase/cloudstore.dart';
-import 'package:cryptkey/Firebase/dummyTestData.dart';
 import 'package:cryptkey/Firebase/firebaseLogin.dart';
 import 'package:cryptkey/Firebase/firebaseLogout.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
-import 'package:cryptkey/screens/homePage_Screen.dart';
 import 'package:cryptkey/screens/setEncryptionPin.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:cryptkey/widgets/routeBuilder.dart';
@@ -24,8 +22,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   // bool _isLoading = false;
   @override
   void initState() {
-     FirebaseLogout.logout();
-    // TODO: implement initState
+    FirebaseLogout.logout();
     super.initState();
   }
 
@@ -101,11 +98,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                             onPressed: () async {
                               provider.isLoadingAuth(true);
                               try {
-                                final UserCredential? credential =
-                                    await LoginService.login();
-                                // UserExists()
-                                //     .checkUserExistence(credential!.user!.uid);
-
+                                await LoginService.login();
                                 SharedPreferences prefs =
                                     await SharedPreferences.getInstance();
                                 prefs.setBool('isFirst', true);
@@ -113,15 +106,14 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                   final bool doesExist =
                                       await CloudFirestoreService()
                                           .checkAndAddUser();
-
-                                  if (!context.mounted) return;
-
-                                  Navigator.pushReplacement(
-                                      context,
-                                      AnimatedRouteBuilder(
-                                          anotherPage: SetEncryptionPin(
-                                        doesExist: doesExist,
-                                      )).animatedRoute());
+                                  if (context.mounted) {
+                                    Navigator.pushReplacement(
+                                        context,
+                                        AnimatedRouteBuilder(
+                                            anotherPage: SetEncryptionPin(
+                                          doesExist: doesExist,
+                                        )).animatedRoute());
+                                  }
                                 } else {
                                   ToastMessage.showToast("An error occurred");
                                 }
