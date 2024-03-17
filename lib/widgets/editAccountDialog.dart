@@ -3,7 +3,6 @@ import 'package:cryptkey/data/passwordManagerModel.dart';
 import 'package:cryptkey/data/uploadToCloud.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/provider/widgetProvider.dart';
-import 'package:cryptkey/utils/passwordGenerator.dart';
 import 'package:cryptkey/widgets/customSlider.dart';
 import 'package:cryptkey/widgets/customTextField_widget.dart';
 import 'package:flutter/material.dart';
@@ -61,14 +60,14 @@ class EditAccountWidget {
                                 "Password", value.controller),
                             const SizedBox(height: 10),
                             Text(
-                              "Generate Password Instead",
+                              "Slide to Generate Password",
                               style: TextStyle(
                                   color: Colors.white.withOpacity(0.6)),
                               textAlign: TextAlign.left,
                             ),
                             CustomSlider.customSlider(context),
                            
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [

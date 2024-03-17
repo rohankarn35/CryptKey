@@ -39,10 +39,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _canUse() async {
-    if (!await isFirst()) {
+ 
       if (!await MobileAuth.authenticate("Verify to Enter")) {
         exit(0);
-      }
+      
     }
   }
 
@@ -82,7 +82,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async => false,
+      onWillPop: (){
+        exit(0);
+      },
       child: Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: false,
@@ -91,8 +93,10 @@ class _HomePageState extends State<HomePage> {
             actions: [
               GestureDetector(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const UserPage()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const UserPage()));
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(right: 20),
@@ -105,7 +109,8 @@ class _HomePageState extends State<HomePage> {
                         child: CachedNetworkImage(
                           width: 40,
                           height: 40,
-                          imageUrl: FirebaseAuth.instance.currentUser!.photoURL!,
+                          imageUrl:
+                              FirebaseAuth.instance.currentUser!.photoURL!,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   SvgPicture.asset("assets/icons/others.svg"),
@@ -155,13 +160,15 @@ class _HomePageState extends State<HomePage> {
                                 ? Container()
                                 : ListTile(
                                     leading: Hero(
-                                      tag: value.platformsList[index].toString(),
+                                      tag:
+                                          value.platformsList[index].toString(),
                                       child: Container(
                                         height: 50,
                                         width: 50,
                                         decoration: BoxDecoration(
                                           color: Colors.white,
-                                          borderRadius: BorderRadius.circular(50),
+                                          borderRadius:
+                                              BorderRadius.circular(50),
                                         ),
                                         child: CustomIcon().customIcon(
                                             value.platformsList[index]
@@ -182,23 +189,20 @@ class _HomePageState extends State<HomePage> {
                                           color: Colors.white, fontSize: 13),
                                     ),
                                     onTap: () async {
-                                         
                                       // Boxes.getData().deleteAt(data[index].key);
                                       try {
                                         if (await MobileAuth.authenticate(
                                             "Verify to view accounts")) {
+                                          if (!context.mounted) return;
 
-      
-                                              if (!context.mounted) return;
-                                                
-                                              
                                           Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                   builder: (context) =>
                                                       PasswordDetailsScreen(
-                                                        platformName: value
-                                                            .platformsList[index],
+                                                        platformName:
+                                                            value.platformsList[
+                                                                index],
                                                         index: index,
                                                       )));
                                         } else {
@@ -225,12 +229,9 @@ class _HomePageState extends State<HomePage> {
             ),
             onPressed: () {
               try {
-                // UploadToCloud().testData();
-                // CloudFirestoreService().updateWhileInternetConnection();
-      
                 CustomDialog().showCustomDialog(context);
               } catch (e) {
-                print("floating $e");
+                ToastMessage.showToast("Error Occured");
               }
             },
             child: const Icon(

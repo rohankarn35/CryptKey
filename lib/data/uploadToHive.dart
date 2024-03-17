@@ -10,7 +10,8 @@ class UploadToHive {
   // Upload data to hive
   Future<void> uploadDataToHive(bool isDataUploaded) async {
     try {
- 
+      final box = Boxes.getData();
+
       final CollectionReference collectionReference =
           FirebaseFirestore.instance.collection('cryptkey');
       final userDocRef =
@@ -18,10 +19,9 @@ class UploadToHive {
       final userDocSnapshot = await userDocRef.get();
 
       final dynamic existingData = userDocSnapshot.data();
-           SharedPreferences prefs = await SharedPreferences.getInstance();
-      final bool hasUploadedData = prefs.getBool('hasUploadedData') ?? false;
+      SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      if (!hasUploadedData) {
+      if (isDataUploaded) {
         final Map<String, dynamic> dataMap =
             existingData != null && existingData is Map
                 ? Map<String, dynamic>.from(existingData)
@@ -55,13 +55,11 @@ class UploadToHive {
             password: password,
             platformName: platformName,
           );
-          final box = Boxes.getData();
           box.add(paswordManagerModelData);
           paswordManagerModelData.save();
-                });
+        });
 
         prefs.setBool('isFirst', false);
-        prefs.setBool('hasUploadedData', true);
         ToastMessage.showToast("Data Updated");
       } else {
         await Future.delayed(const Duration(milliseconds: 1000));

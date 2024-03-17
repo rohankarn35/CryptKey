@@ -4,6 +4,8 @@ class ShowConfirmationWidget {
   static  showConfirmationDialog(
       BuildContext context, String content, String message) async {
     return  showDialog(
+      useRootNavigator: true,
+      anchorPoint: const Offset(-10.0, 0.0),
         context: context,
         builder: (context) {
           return Dialog(
@@ -17,7 +19,8 @@ class ShowConfirmationWidget {
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.only(
+                    top: 20.0, left: 20.0, right: 20.0, bottom: 5),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

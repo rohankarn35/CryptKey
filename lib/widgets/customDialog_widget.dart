@@ -3,7 +3,6 @@ import 'package:cryptkey/data/passwordManagerModel.dart';
 import 'package:cryptkey/data/uploadToCloud.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/provider/widgetProvider.dart';
-import 'package:cryptkey/utils/passwordGenerator.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:cryptkey/widgets/customDropDown_widget.dart';
 import 'package:cryptkey/widgets/customSlider.dart';
@@ -147,6 +146,7 @@ class CustomDialog {
                                       text: widgetProvider.controller.text));
                                   Navigator.pop(context);
                                   ToastMessage.showToast("Account added");
+                                  UploadToCloud().uploadToCloud();
                                   widgetProvider.selectedValue = null;
                                   widgetProvider.isPlatformNameVisible = false;
                                 } else {

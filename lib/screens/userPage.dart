@@ -11,6 +11,7 @@ import 'package:cryptkey/widgets/routeBuilder.dart';
 import 'package:cryptkey/widgets/showConfirmationwidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 
 class UserPage extends StatefulWidget {
@@ -27,6 +28,7 @@ class _UserPageState extends State<UserPage> {
   @override
   Widget build(BuildContext context) {
     final navigation = Navigator.of(context);
+    final mycontext = context;
     return Consumer<ScreenProvider>(
       builder: (BuildContext context, provider, child) {
         return Scaffold(
@@ -127,7 +129,7 @@ class _UserPageState extends State<UserPage> {
                       ToastMessage.showToast("Data Cleared");
                     }
                   } catch (e) {
-                    print(e);
+                    ToastMessage.showToast("Error Occurred");
                   }
                 }),
                 CustomTile().customTile("Privacy Policy", "App Privacy Policy",
@@ -137,19 +139,26 @@ class _UserPageState extends State<UserPage> {
                 const Spacer(),
                 TextButton(
                     onPressed: () async {
-                      if (await ShowConfirmationWidget.showConfirmationDialog(
-                          context, "Logout", "Do you want to logout?")) {
-                        ClearSharedData().clearSharedData();
-
-                        await FirebaseLogout.logout();
-                        ClearHiveData.clearData();
+                      if (!await InternetConnectionChecker().hasConnection) {
+                        ToastMessage.showToast("Please Check Your Internet");
+                      } else {
                         if (context.mounted) {
-                          Navigator.pushReplacement(
-                            context,
-                            AnimatedRouteBuilder(
-                                    anotherPage: const AuthenticationPage())
-                                .animatedRoute(),
-                          );
+                          if (await ShowConfirmationWidget
+                              .showConfirmationDialog(mycontext, "Logout",
+                                  "Do you want to logout?")) {
+                            ClearSharedData().clearSharedData();
+
+                            await FirebaseLogout.logout();
+                            ClearHiveData.clearData();
+                            if (context.mounted) {
+                              Navigator.pushReplacement(
+                                context,
+                                AnimatedRouteBuilder(
+                                        anotherPage: const AuthenticationPage())
+                                    .animatedRoute(),
+                              );
+                            }
+                          }
                         }
                       }
                     },

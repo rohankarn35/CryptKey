@@ -17,7 +17,7 @@ class PasswordGenerator {
     password += symbols[random.nextInt(symbols.length)];
 
     // Fill remaining characters randomly
-    final characters = lowercaseLetters + uppercaseLetters + numbers + symbols;
+    const characters = lowercaseLetters + uppercaseLetters + numbers + symbols;
     for (int i = 4; i < length; i++) {
       password += characters[random.nextInt(characters.length)];
     }

@@ -11,7 +11,6 @@ class FirebaseLogout {
       } else {}
     } catch (error) {
       ToastMessage.showToast("An error occured");
-      // Handle error here, such as showing a snackbar or dialog to the user
     }
   }
 }
