@@ -5,6 +5,7 @@ import 'package:cryptkey/provider/widgetProvider.dart';
 import 'package:cryptkey/screens/authenticationPage.dart';
 import 'package:cryptkey/screens/getStarted.dart';
 import 'package:cryptkey/screens/homePage_Screen.dart';
+import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +63,7 @@ class MyApp extends StatelessWidget {
           home: FirebaseAuth.instance.currentUser != null
               ? pinexist
                   ? const HomePage()
-                  :const AuthenticationPage()
+                  : const AuthenticationPage()
               : isGetStarted
                   ? const AuthenticationPage()
                   : const GetStartedPage()

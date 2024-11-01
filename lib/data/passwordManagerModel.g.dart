@@ -21,13 +21,14 @@ class PasswordManagerModelAdapter extends TypeAdapter<PasswordManagerModel> {
       username: fields[1] as String,
       password: fields[2] as String,
       platformName: fields[3] as String?,
+      isUploaded: fields[4] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, PasswordManagerModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.platform)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class PasswordManagerModelAdapter extends TypeAdapter<PasswordManagerModel> {
       ..writeByte(2)
       ..write(obj.password)
       ..writeByte(3)
-      ..write(obj.platformName);
+      ..write(obj.platformName)
+      ..writeByte(4)
+      ..write(obj.isUploaded);
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:cryptkey/data/boxes.dart';
+import 'package:cryptkey/data/editHive.dart';
 import 'package:cryptkey/data/passwordManagerModel.dart';
 import 'package:cryptkey/data/uploadToCloud.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
@@ -13,10 +14,12 @@ class EditAccountWidget {
       String? platformName, String username, String password) async {
     TextEditingController accountNameEditingController =
         TextEditingController(text: username);
+
     final widgetProvider = Provider.of<WidgetProvider>(context, listen: false);
 
     widgetProvider.setSliderValue(8);
     widgetProvider.controller.clear();
+    widgetProvider.updatePassword(password);
 
     return showDialog(
         context: context,
@@ -66,7 +69,6 @@ class EditAccountWidget {
                               textAlign: TextAlign.left,
                             ),
                             CustomSlider.customSlider(context),
-                           
                             const SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -86,14 +88,13 @@ class EditAccountWidget {
                                 ),
                                 // const SizedBox(width: 20),
                                 TextButton(
-                                  onPressed: () {
+                                  onPressed: () async {
                                     if (accountNameEditingController
                                         .text.isNotEmpty) {
                                       username =
                                           accountNameEditingController.text;
                                     }
-                                    if (value.controller
-                                        .text.isNotEmpty) {
+                                    if (value.controller.text.isNotEmpty) {
                                       password = value.controller.text;
                                     }
                                     final data = PasswordManagerModel(
@@ -102,15 +103,8 @@ class EditAccountWidget {
                                       password: password,
                                       platformName: platformName,
                                     );
-
-                                    final box = Boxes.getData();
-                                    box.putAt(index, data);
-                                    data.save();
-                                    Provider.of<ScreenProvider>(context,
-                                            listen: false)
-                                        .getAllFields(index);
-                                    UploadToCloud().uploadToCloud();
-
+                                    await EditHive.editHive(
+                                        data, index, context);
                                     Navigator.of(context).pop();
                                   },
                                   child: const Text(

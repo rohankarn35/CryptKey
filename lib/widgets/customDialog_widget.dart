@@ -1,3 +1,8 @@
+import 'package:cryptkey/data/addToHive.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/data/passwordManagerModel.dart';
 import 'package:cryptkey/data/uploadToCloud.dart';
@@ -7,10 +12,6 @@ import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:cryptkey/widgets/customDropDown_widget.dart';
 import 'package:cryptkey/widgets/customSlider.dart';
 import 'package:cryptkey/widgets/customTextField_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
 
 class CustomDialog {
   TextEditingController platformController = TextEditingController();
@@ -107,48 +108,71 @@ class CustomDialog {
                               style: TextStyle(color: Colors.white),
                             )),
                         TextButton(
-                            onPressed: () {
+                            onPressed: () async {
                               if (widgetProvider.selectedValue != null &&
                                   usernameController.text.isNotEmpty) {
                                 if (widgetProvider.selectedValue == "Others" &&
                                     platformController.text.isNotEmpty) {
-                                  final data = PasswordManagerModel(
-                                    platform: widgetProvider.selectedValue!,
-                                    username: usernameController.text,
-                                    password: widgetProvider.controller.text,
-                                    platformName:
-                                        platformController.text.trim(),
+                                  bool isAdded = await AddDataToHive.addData(
+                                    platformController.text.trim(),
+                                    widgetProvider.selectedValue!,
+                                    usernameController.text,
+                                    widgetProvider.controller.text,
                                   );
-                                  final box = Boxes.getData();
-                                  box.add(data);
-                                  data.save();
+                                  if (isAdded) {
+                                    widgetProvider.selectedValue = null;
+                                    widgetProvider.isPlatformNameVisible =
+                                        false;
+                                    Navigator.pop(context);
+                                  }
 
-                                  Clipboard.setData(ClipboardData(
-                                      text: widgetProvider.controller.text));
-                                  Navigator.pop(context);
-                                  ToastMessage.showToast(
-                                      "Account added and Password Coped to Clipboard");
-                                  widgetProvider.selectedValue = null;
-                                  widgetProvider.isPlatformNameVisible = false;
+                                  // final data = PasswordManagerModel(
+                                  //   platform: widgetProvider.selectedValue!,
+                                  //   username: usernameController.text,
+                                  //   password: widgetProvider.controller.text,
+                                  //   platformName:
+                                  //       platformController.text.trim(),
+                                  // );
+                                  // final box = Boxes.getData();
+                                  // box.add(data);
+                                  // data.save();
+
+                                  // Clipboard.setData(ClipboardData(
+                                  //     text: widgetProvider.controller.text));
+                                  // Navigator.pop(context);
+                                  // ToastMessage.showToast(
+                                  //     "Account added and Password Coped to Clipboard");
                                 } else if (widgetProvider.selectedValue !=
                                     "Others") {
-                                  final data = PasswordManagerModel(
-                                    platform: widgetProvider.selectedValue!,
-                                    username: usernameController.text,
-                                    password: widgetProvider.controller.text,
-                                    platformName:
-                                        platformController.text.trim(),
+                                  bool isAdded = await AddDataToHive.addData(
+                                    platformController.text.trim(),
+                                    widgetProvider.selectedValue!,
+                                    usernameController.text,
+                                    widgetProvider.controller.text,
                                   );
-                                  final box = Boxes.getData();
-                                  box.add(data);
-                                  data.save();
-                                  Clipboard.setData(ClipboardData(
-                                      text: widgetProvider.controller.text));
-                                  Navigator.pop(context);
-                                  ToastMessage.showToast("Account added");
-                                  UploadToCloud().uploadToCloud();
-                                  widgetProvider.selectedValue = null;
-                                  widgetProvider.isPlatformNameVisible = false;
+                                  if (isAdded) {
+                                    Navigator.pop(context);
+                                    widgetProvider.selectedValue = null;
+                                    widgetProvider.isPlatformNameVisible =
+                                        false;
+                                  }
+                                  // final data = PasswordManagerModel(
+                                  //   platform: widgetProvider.selectedValue!,
+                                  //   username: usernameController.text,
+                                  //   password: widgetProvider.controller.text,
+                                  //   platformName:
+                                  //       platformController.text.trim(),
+                                  // );
+                                  // final box = Boxes.getData();
+                                  // box.add(data);
+                                  // data.save();
+                                  // Clipboard.setData(ClipboardData(
+                                  //     text: widgetProvider.controller.text));
+                                  // Navigator.pop(context);
+                                  // ToastMessage.showToast("Account added");
+                                  // UploadToCloud().uploadToCloud();
+                                  // widgetProvider.selectedValue = null;
+                                  // widgetProvider.isPlatformNameVisible = false;
                                 } else {
                                   Fluttertoast.showToast(
                                       msg: "Please specify platform",

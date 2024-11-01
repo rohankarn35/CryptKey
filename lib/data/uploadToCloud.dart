@@ -2,28 +2,35 @@ import 'package:cryptkey/Firebase/cloudstore.dart';
 import 'package:cryptkey/data/boxes.dart';
 import 'package:cryptkey/data/dataEncryption.dart';
 import 'package:cryptkey/data/firebaseModels.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UploadToCloud {
   // Upload to Cloud
   Future<void> uploadToCloud() async {
     try {
-      final box = Boxes.getData();
-      for (var i = 0; i < box.length; i++) {
-        final data = box.getAt(i);
-        if (data != null) {
-          final cloudData = FirebaseModel(
-            id: i.toString(),
-            platform: data.platform,
-            username: data.username,
-            password: data.password,
-            platformName: data.platformName,
-          );
-          final encryptedCloudData =
-              await DataEncryption().encryptData(cloudData);
-          if (encryptedCloudData != null) {
-            await CloudFirestoreService().addData(encryptedCloudData);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool isUpdating = prefs.getBool("willBeUpdated") ?? true;
+      if (isUpdating) {
+        final box = Boxes.getData();
+        for (var i = 0; i < box.length; i++) {
+          final data = box.getAt(i);
+          if (data != null) {
+            if (!data.isUploaded) {
+              final cloudData = FirebaseModel(
+                id: i.toString(),
+                platform: data.platform,
+                username: data.username,
+                password: data.password,
+                platformName: data.platformName,
+                isUploaded: true,
+              );
+              final encryptedCloudData =
+                  await DataEncryption().encryptData(cloudData);
+              if (encryptedCloudData != null) {
+                await CloudFirestoreService().addData(encryptedCloudData);
+              }
+            }
           }
-          print("Data uploaded to cloud");
         }
       }
     } catch (e) {

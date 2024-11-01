@@ -13,10 +13,13 @@ class PasswordManagerModel extends HiveObject {
   String password;
   @HiveField(3)
   String? platformName;
+  @HiveField(4)
+  bool isUploaded;
   PasswordManagerModel({
     required this.platform,
     required this.username,
     required this.password,
     required this.platformName,
+    this.isUploaded = false,
   });
 }

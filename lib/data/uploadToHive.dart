@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UploadToHive {
   // Upload data to hive
-  Future<void> uploadDataToHive(bool isDataUploaded) async {
+  Future<void> uploadDataToHive() async {
     try {
       final box = Boxes.getData();
 
@@ -21,7 +21,7 @@ class UploadToHive {
       final dynamic existingData = userDocSnapshot.data();
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      if (isDataUploaded) {
+      if (existingData != null) {
         final Map<String, dynamic> dataMap =
             existingData != null && existingData is Map
                 ? Map<String, dynamic>.from(existingData)
@@ -54,18 +54,32 @@ class UploadToHive {
             username: username,
             password: password,
             platformName: platformName,
+            isUploaded: true,
           );
-          box.add(paswordManagerModelData);
-          paswordManagerModelData.save();
+          final box = Boxes.getData();
+          // Check if the data already exists
+
+          // Add data only if it doesn't already exist
+          bool isDuplicate = false;
+          for (var i = 0; i < box.length; i++) {
+            if (box.getAt(i)!.platform == platform &&
+                box.getAt(i)!.username == username) {
+              isDuplicate = true;
+              break;
+            }
+          }
+          if (!isDuplicate) {
+            box.add(paswordManagerModelData);
+            paswordManagerModelData.save();
+          }
         });
 
         prefs.setBool('isFirst', false);
         ToastMessage.showToast("Data Updated");
       } else {
-        await Future.delayed(const Duration(milliseconds: 1000));
+        await Future.delayed(const Duration(milliseconds: 800));
       }
     } catch (e) {
-      print("Error while uploading to hive: $e");
       ToastMessage.showToast("Error uploading data to hive");
     }
   }

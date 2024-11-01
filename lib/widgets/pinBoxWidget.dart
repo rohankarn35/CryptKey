@@ -87,6 +87,7 @@ class _PinBoxState extends State<PinBox> {
 
                             bool isPinCorrect =
                                 await CheckPin().checkPin(value);
+                            print(isPinCorrect);
                             provider.checkisPinCorrect(isPinCorrect);
                             if (provider.isPinCorrect) {
                               if (await MobileAuth.canAuthenticate()) {
@@ -94,7 +95,7 @@ class _PinBoxState extends State<PinBox> {
                                     "Setup your biometrics")) {
                                   prefs.setString("pin", value);
                                   Future.delayed(
-                                          const Duration(milliseconds: 1000))
+                                          const Duration(milliseconds: 1))
                                       .then((value) => Navigator.push(
                                             context,
                                             MaterialPageRoute(

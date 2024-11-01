@@ -42,43 +42,40 @@ class _SetEncryptionPinState extends State<SetEncryptionPin> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
-      child: Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                widget.doesExist
-                    ? "Enter your Encryption Pin"
-                    : "Set your encryption pin",
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25),
-              ),
-              const SizedBox(
-                height: 40,
-              ),
-              PinBox(
-                controllers: controllers,
-                focusNodes: focusNodes,
-                doesExist: widget.doesExist,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Consumer<WidgetProvider>(builder: (ctx, provider, child) {
-                return !provider.isPinCorrect
-                    ? const Text(
-                        "Incorrect Pin Entered",
-                        style: TextStyle(color: Colors.red),
-                      )
-                    : const Text("");
-              })
-            ],
-          ),
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              widget.doesExist
+                  ? "Enter your Encryption Pin"
+                  : "Set your encryption pin",
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25),
+            ),
+            const SizedBox(
+              height: 40,
+            ),
+            PinBox(
+              controllers: controllers,
+              focusNodes: focusNodes,
+              doesExist: widget.doesExist,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Consumer<WidgetProvider>(builder: (ctx, provider, child) {
+              return !provider.isPinCorrect
+                  ? const Text(
+                      "Incorrect Pin Entered",
+                      style: TextStyle(color: Colors.red),
+                    )
+                  : const Text("");
+            })
+          ],
         ),
       ),
     );

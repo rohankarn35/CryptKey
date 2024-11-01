@@ -56,9 +56,12 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
     super.initState();
   }
 
+  pop() {
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final navigation = Navigator.of(context);
     return Scaffold(
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 2, 18, 46),
@@ -67,7 +70,7 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
               final screenProvider =
                   Provider.of<ScreenProvider>(context, listen: false);
               screenProvider.setPlatforms();
-              navigation.pop();
+              pop();
             },
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
@@ -167,7 +170,7 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                                       .numberOfAccounts(widget.platformName);
 
                                   if (numberofAccounts == 0) {
-                                    navigation.pop();
+                                    pop();
                                   }
 
                                   isVisibleList = List.generate(

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cryptkey/Firebase/cloudstore.dart';
 import 'package:cryptkey/data/uploadToHive.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/screens/passwordDetailScreen.dart';
@@ -13,7 +12,6 @@ import 'package:cryptkey/widgets/customIcon.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,49 +25,42 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   Future<bool> isFirst() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('isFirst') ?? true;
+    bool isFirst = prefs.getBool('isFirst') ?? false;
+    return isFirst;
   }
 
   Future<void> upload() async {
-    if (await isFirst() && await InternetConnectionChecker().hasConnection) {
-      UploadToHive().uploadDataToHive(false);
-    } else if (!await InternetConnectionChecker().hasConnection) {
-      ToastMessage.showToast("No Internet Connection");
+    if (await isFirst()) {
+      await UploadToHive().uploadDataToHive();
     }
   }
 
-  void _canUse() async {
- 
-      if (!await MobileAuth.authenticate("Verify to Enter")) {
-        exit(0);
-      
-    }
-  }
+  // void _canUse() async {
+  //   if (!await MobileAuth.authenticate("Verify to Enter")) {
+  //     exit(0);
+  //   }
+  // }
 
-  Future<void> updateWhileInternetConnection() async {
-    if (!await isFirst() && await InternetConnectionChecker().hasConnection) {
-      CloudFirestoreService().updateWhileInternetConnection();
-    }
-  }
+  // Future<void> updateWhileInternetConnection() async {
+  //   if (!await isFirst() && await InternetConnectionChecker().hasConnection) {
+  //     CloudFirestoreService().updateWhileInternetConnection();
+  //   }
+  // }
 
-  Future<void> fetchAndUpdateData() async {
-    Provider.of<ScreenProvider>(context, listen: false).setPlatforms();
-  }
+  // Future<void> fetchAndUpdateData() async {
+  //   Provider.of<ScreenProvider>(context, listen: false).setPlatforms();
+  // }
 
   @override
   void initState() {
-    _canUse();
-    upload().then((_) async {
-      // Wait for data upload to complete before fetching and updating data
+    // _canUse();
+    // upload().then((_) async {
+    //   // Wait for data upload to complete before fetching and updating data
 
-      await UploadToHive().uploadDataToHive(true);
+    //   fetchAndUpdateData(); // Fetch and update data after upload
+    // });
 
-      fetchAndUpdateData(); // Fetch and update data after upload
-    });
-
-    // UploadToHive().uploadDataToHive();
-
-    updateWhileInternetConnection();
+    // updateWhileInternetConnection();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ScreenProvider>(context, listen: false).setPlatforms();
@@ -82,7 +73,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: (){
+      onWillPop: () {
         exit(0);
       },
       child: Scaffold(
@@ -123,13 +114,19 @@ class _HomePageState extends State<HomePage> {
                 ),
               )
             ],
-            title: const Text(
-              'CryptKey',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 30,
-                fontWeight: FontWeight.w400,
-                letterSpacing: 1.5,
+            title: InkWell(
+              onTap: () {
+                print("clicked");
+                upload();
+              },
+              child: const Text(
+                'CryptKey',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                  fontWeight: FontWeight.w400,
+                  letterSpacing: 1.5,
+                ),
               ),
             ),
           ),

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryptkey/Firebase/cloudstore.dart';
 import 'package:cryptkey/Firebase/firebaseLogout.dart';
 import 'package:cryptkey/data/clearHiveData.dart';
+import 'package:cryptkey/data/uploadToCloud.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/screens/authenticationPage.dart';
 import 'package:cryptkey/utils/clearSharedData.dart';
@@ -11,6 +12,7 @@ import 'package:cryptkey/widgets/routeBuilder.dart';
 import 'package:cryptkey/widgets/showConfirmationwidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 
@@ -25,6 +27,19 @@ class _UserPageState extends State<UserPage> {
   String username = FirebaseAuth.instance.currentUser!.displayName!;
   String userEmail = FirebaseAuth.instance.currentUser!.email!;
   String userPhoto = FirebaseAuth.instance.currentUser!.photoURL!;
+
+  pop() {
+    Navigator.pop(context);
+  }
+
+  nagivateToOtherScreen() {
+    Navigator.pushReplacement(
+      context,
+      AnimatedRouteBuilder(anotherPage: const AuthenticationPage())
+          .animatedRoute(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final navigation = Navigator.of(context);
@@ -119,7 +134,7 @@ class _UserPageState extends State<UserPage> {
                             "Clear Data",
                             "Are you sure you want to clear all  data?");
                     if (result) {
-                      navigation.pop();
+                      pop();
 
                       await CloudFirestoreService().clearData();
                       ClearHiveData.clearData();
@@ -142,22 +157,18 @@ class _UserPageState extends State<UserPage> {
                       if (!await InternetConnectionChecker().hasConnection) {
                         ToastMessage.showToast("Please Check Your Internet");
                       } else {
-                        if (context.mounted) {
-                          if (await ShowConfirmationWidget
-                              .showConfirmationDialog(mycontext, "Logout",
-                                  "Do you want to logout?")) {
+                        if (await ShowConfirmationWidget.showConfirmationDialog(
+                            context, "Logout", "Do you want to logout?")) {
+                          if (await InternetConnectionChecker().hasConnection) {
+                            await UploadToCloud().uploadToCloud();
                             ClearSharedData().clearSharedData();
 
                             await FirebaseLogout.logout();
                             ClearHiveData.clearData();
-                            if (context.mounted) {
-                              Navigator.pushReplacement(
-                                context,
-                                AnimatedRouteBuilder(
-                                        anotherPage: const AuthenticationPage())
-                                    .animatedRoute(),
-                              );
-                            }
+                            nagivateToOtherScreen();
+                          } else {
+                            Fluttertoast.showToast(
+                                msg: "No Internet Connection");
                           }
                         }
                       }
