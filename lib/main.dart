@@ -4,7 +4,6 @@ import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/provider/widgetProvider.dart';
 import 'package:cryptkey/screens/getStarted.dart';
 import 'package:cryptkey/screens/homePage_Screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
