@@ -21,7 +21,7 @@ class PasswordManagerModelAdapter extends TypeAdapter<PasswordManagerModel> {
       username: fields[1] as String,
       password: fields[2] as String,
       platformName: fields[3] as String?,
-      isUploaded: fields[4] as bool,
+      isUploaded: fields[4] as bool?,
     );
   }
 

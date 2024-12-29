@@ -39,8 +39,7 @@ class ScreenProvider extends ChangeNotifier {
   List<String> _platformsList = [];
 
   List<String> get platformsList => _platformsList;
-  String? _screenPin;
-  String? get screenpin => _screenPin;
+
   String? _encryptionPin;
   String? get encryptionpin => _encryptionPin;
 
@@ -58,9 +57,7 @@ class ScreenProvider extends ChangeNotifier {
 
   void setPin() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? getpin = prefs.getString("spin");
     String? encPin = prefs.getString("pin");
-    _screenPin = getpin;
     _encryptionPin = encPin;
   }
 

@@ -63,31 +63,46 @@ class CloudFirestoreService {
     }
   }
 
-  Future<bool> checkAndAddUser() async {
+  Future<bool> isUserInDatabase() async {
     try {
       if (!isGuestUser()) {
         final userDocRef = _userCollectionRef.doc('usersList');
-
         final userDocSnapshot = await userDocRef.get();
 
         final Map<String, dynamic> dataMap =
             userDocSnapshot.data() as Map<String, dynamic>? ?? {};
 
-        if (dataMap.containsKey(FirebaseAuth.instance.currentUser!.uid)) {
-          return true;
-        } else {
-          dataMap[FirebaseAuth.instance.currentUser!.uid] = {
+        return dataMap.containsKey(FirebaseAuth.instance.currentUser!.uid);
+      }
+      return false;
+    } catch (e) {
+      ToastMessage.showToast("An error occurred while checking the database");
+      return false;
+    }
+  }
+
+  Future<void> addUserToDatabase() async {
+    try {
+      if (!isGuestUser()) {
+        final userDocRef = _userCollectionRef.doc('usersList');
+        final userDocSnapshot = await userDocRef.get();
+
+        final Map<String, dynamic> dataMap =
+            userDocSnapshot.data() as Map<String, dynamic>? ?? {};
+
+        final userId = FirebaseAuth.instance.currentUser!.uid;
+
+        if (!dataMap.containsKey(userId)) {
+          dataMap[userId] = {
             'email': FirebaseAuth.instance.currentUser!.email,
           };
 
           await userDocRef.set(dataMap);
-          return false;
+          ToastMessage.showToast("User added successfully");
         }
       }
-      return false;
     } catch (e) {
-      ToastMessage.showToast("An error occurred");
-      return false;
+      ToastMessage.showToast("An error occurred while adding the user");
     }
   }
 

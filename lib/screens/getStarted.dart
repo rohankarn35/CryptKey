@@ -2,7 +2,6 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:cryptkey/screens/authenticationPage.dart';
 import 'package:cryptkey/widgets/routeBuilder.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class GetStartedPage extends StatefulWidget {
   const GetStartedPage({super.key});
@@ -14,10 +13,10 @@ class GetStartedPage extends StatefulWidget {
 class _GetStartedPageState extends State<GetStartedPage> {
   @override
   void initState() {
-    
     // TODO: implement initState
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,15 +67,11 @@ class _GetStartedPageState extends State<GetStartedPage> {
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.8,
               child: ElevatedButton(
-                onPressed: () async {
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                  prefs.setBool("isGetStarted", true);
-                  if(!context.mounted ) return;
-
-                  
+                onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    AnimatedRouteBuilder(anotherPage: const AuthenticationPage())
+                    AnimatedRouteBuilder(
+                            anotherPage: const AuthenticationPage())
                         .animatedRoute(),
                   );
                 },

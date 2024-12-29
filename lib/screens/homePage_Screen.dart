@@ -15,6 +15,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/trackpage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,6 +29,11 @@ class _HomePageState extends State<HomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isFirst = prefs.getBool('isFirst') ?? true;
     return isFirst;
+  }
+
+  Future<void> isGetStarted() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("isGetStarted", true);
   }
 
   Future<void> upload() async {
@@ -44,6 +50,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    isGetStarted();
+    savePageState("HomePage");
+
     super.initState();
   }
 
@@ -65,144 +74,153 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          toolbarHeight: 80,
-          backgroundColor: const Color.fromARGB(255, 2, 18, 46),
-          actions: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const UserPage()));
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: Hero(
-                  tag: 'user',
-                  child: SizedBox(
-                    height: 40,
-                    width: 40,
-                    child: ClipOval(
-                      child: !isGuestUser()
-                          ? CachedNetworkImage(
-                              width: 40,
-                              height: 40,
-                              imageUrl:
-                                  FirebaseAuth.instance.currentUser!.photoURL!,
-                              progressIndicatorBuilder: (context, url,
-                                      downloadProgress) =>
-                                  SvgPicture.asset("assets/icons/others.svg"),
-                              errorWidget: (context, url, error) =>
-                                  const Icon(Icons.error),
-                            )
-                          : SvgPicture.asset(
-                              "assets/icons/others.svg",
-                              height: 40,
-                              width: 40,
-                              color: Colors.white,
-                            ),
-                    ),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        toolbarHeight: 80,
+        backgroundColor: const Color.fromARGB(255, 2, 18, 46),
+        actions: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const UserPage()));
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: Hero(
+                tag: 'user',
+                child: SizedBox(
+                  height: 40,
+                  width: 40,
+                  child: ClipOval(
+                    child: !isGuestUser()
+                        ? CachedNetworkImage(
+                            width: 40,
+                            height: 40,
+                            imageUrl:
+                                FirebaseAuth.instance.currentUser!.photoURL!,
+                            progressIndicatorBuilder:
+                                (context, url, downloadProgress) =>
+                                    SvgPicture.asset("assets/icons/others.svg"),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.error),
+                          )
+                        : SvgPicture.asset(
+                            "assets/icons/others.svg",
+                            height: 40,
+                            width: 40,
+                            color: Colors.white,
+                          ),
                   ),
                 ),
               ),
-            )
-          ],
-          title: const Text(
-            'CryptKey',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 30,
-              fontWeight: FontWeight.w400,
-              letterSpacing: 1.5,
             ),
+          )
+        ],
+        title: const Text(
+          'CryptKey',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 30,
+            fontWeight: FontWeight.w400,
+            letterSpacing: 1.5,
           ),
         ),
-        body: Consumer<ScreenProvider>(
-          builder: (context, value, child) {
-            return value.platformsList.isEmpty
-                ? const Center(
-                    child: Text(
-                      "Tap on + icon to add data",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: value.platformsList.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                            top: 8.0, left: 8.0, right: 8.0),
-                        child: Card(
-                          color: const Color.fromARGB(255, 2, 27, 70),
-                          elevation: 10,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          child: value.numberOfAccounts(
-                                      value.platformsList[index]) ==
-                                  0
-                              ? Container()
-                              : ListTile(
-                                  leading: Hero(
-                                    tag: value.platformsList[index].toString(),
-                                    child: Container(
-                                      height: 50,
-                                      width: 50,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(50),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Consumer<ScreenProvider>(
+            builder: (context, value, child) {
+              return value.platformsList.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "Tap on + icon to add data",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
+                  : GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: constraints.maxWidth < 600 ? 1 : 2,
+                        childAspectRatio: 4,
+                      ),
+                      itemCount: value.platformsList.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Card(
+                            color: const Color.fromARGB(255, 2, 27, 70),
+                            elevation: 8,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                            child: value.platformsList[index].isEmpty
+                                ? Container()
+                                : ListTile(
+                                    leading: Hero(
+                                      tag:
+                                          value.platformsList[index].toString(),
+                                      child: Container(
+                                        height: 50,
+                                        width: 50,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                        ),
+                                        child: CustomIcon().customIcon(
+                                            value.platformsList[index]
+                                                .toLowerCase(),
+                                            35),
                                       ),
-                                      child: CustomIcon().customIcon(
-                                          value.platformsList[index]
-                                              .toLowerCase(),
-                                          35),
                                     ),
+                                    title: Text(
+                                      value.platformsList[index],
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 23),
+                                    ),
+                                    subtitle: Text(
+                                      "${value.numberOfAccounts(value.platformsList[index])} accounts",
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 13),
+                                    ),
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PasswordDetailsScreen(
+                                                    platformName: value
+                                                        .platformsList[index],
+                                                    index: index,
+                                                  )));
+                                    },
                                   ),
-                                  title: Text(
-                                    value.platformsList[index],
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 23),
-                                  ),
-                                  subtitle: Text(
-                                    "${value.numberOfAccounts(value.platformsList[index])} accounts",
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 13),
-                                  ),
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                PasswordDetailsScreen(
-                                                  platformName: value
-                                                      .platformsList[index],
-                                                  index: index,
-                                                )));
-                                  },
-                                ),
-                        ),
-                      );
-                    });
-          },
+                          ),
+                        );
+                      },
+                    );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.white.withAlpha(200),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
         ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.white.withAlpha(200),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-          onPressed: () {
-            try {
-              CustomDialog().showCustomDialog(context);
-            } catch (e) {
-              ToastMessage.showToast("Error Occured");
-            }
-          },
-          child: const Icon(
-            Icons.add,
-            color: Color.fromARGB(255, 2, 18, 46),
-          ),
-        ));
+        onPressed: () {
+          try {
+            CustomDialog().showCustomDialog(context);
+          } catch (e) {
+            ToastMessage.showToast("Error Occured");
+          }
+        },
+        child: const Icon(
+          Icons.add,
+          color: Color.fromARGB(255, 2, 18, 46),
+        ),
+      ),
+    );
   }
 }

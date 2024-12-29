@@ -19,7 +19,8 @@ class PasswordManagerModel extends HiveObject {
     required this.platform,
     required this.username,
     required this.password,
-    required this.platformName,
-    this.isUploaded = false,
-  });
+    this.platformName,
+    bool? isUploaded, // Accept null for backward compatibility
+  }) : isUploaded = isUploaded ?? false; // Assign default value if null
+
 }

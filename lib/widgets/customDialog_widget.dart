@@ -20,6 +20,7 @@ class CustomDialog {
     final screenProvider = Provider.of<ScreenProvider>(context, listen: false);
     widgetProvider.setSliderValue(8);
     widgetProvider.controller.clear();
+    final _formKey = GlobalKey<FormState>();
 
     return showDialog<void>(
       context: context,
@@ -41,121 +42,153 @@ class CustomDialog {
                   top: 20.0, left: 20.0, right: 20.0, bottom: 10.0),
               child: SingleChildScrollView(
                 reverse: true,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      "Add New Password",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    CustomDropDown().customDropDown(context),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    widgetProvider.isPlatformNameVisible
-                        ? CustomTextField.buildTextField(
-                            "Specify Platform (if others)", platformController)
-                        : Container(),
-                    widgetProvider.isPlatformNameVisible
-                        ? const SizedBox(
-                            height: 10,
-                          )
-                        : Container(),
-                    CustomTextField.buildTextField(
-                        "Username", usernameController),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    CustomTextField.buildTextField(
-                        "Password", widgetProvider.controller),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      "Slide to Generate Password",
-                      style: TextStyle(color: Colors.white.withOpacity(0.6)),
-                      textAlign: TextAlign.left,
-                    ),
-                    CustomSlider.customSlider(context),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                            onPressed: () {
-                              widgetProvider.selectedValue = null;
-                              widgetProvider.isPlatformNameVisible = false;
-
-                              Navigator.pop(context);
-                            },
-                            child: const Text(
-                              "Cancel",
-                              style: TextStyle(color: Colors.white),
-                            )),
-                        TextButton(
-                            onPressed: () async {
-                              if (widgetProvider.selectedValue != null &&
-                                  usernameController.text.isNotEmpty) {
-                                if (widgetProvider.selectedValue == "Others" &&
-                                    platformController.text.isNotEmpty) {
-                                  bool isAdded = await AddDataToHive.addData(
-                                    platformController.text.trim(),
-                                    widgetProvider.selectedValue!,
-                                    usernameController.text,
-                                    widgetProvider.controller.text,
-                                  );
-                                  if (isAdded) {
-                                    widgetProvider.selectedValue = null;
-                                    widgetProvider.isPlatformNameVisible =
-                                        false;
-                                    Navigator.pop(context);
-                                  }
-                                } else if (widgetProvider.selectedValue !=
-                                    "Others") {
-                                  bool isAdded = await AddDataToHive.addData(
-                                    platformController.text.trim(),
-                                    widgetProvider.selectedValue!,
-                                    usernameController.text,
-                                    widgetProvider.controller.text,
-                                  );
-                                  if (isAdded) {
-                                    Navigator.pop(context);
-                                    widgetProvider.selectedValue = null;
-                                    widgetProvider.isPlatformNameVisible =
-                                        false;
-                                  }
-                                } else {
-                                  Fluttertoast.showToast(
-                                      msg: "Please specify platform",
-                                      fontSize: 20,
-                                      backgroundColor: Colors.red,
-                                      textColor: Colors.black,
-                                      toastLength: Toast.LENGTH_SHORT,
-                                      gravity: ToastGravity.BOTTOM);
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Add New Password",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      CustomDropDown().customDropDown(context),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      widgetProvider.isPlatformNameVisible
+                          ? CustomTextField.buildTextField(
+                              "Specify Platform (if others)",
+                              platformController,
+                              (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter platform';
                                 }
-                              }
-                              screenProvider.setPlatforms();
-                              await UploadToCloud().uploadToCloud();
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
-                              prefs.setBool("willBeUpdated", true);
-                            },
-                            child: const Text(
-                              "Done",
-                              style: TextStyle(color: Colors.white),
-                            )),
-                      ],
-                    )
-                  ],
+                                return null;
+                              },
+                            )
+                          : Container(),
+                      widgetProvider.isPlatformNameVisible
+                          ? const SizedBox(
+                              height: 10,
+                            )
+                          : Container(),
+                      CustomTextField.buildTextField(
+                        "Username",
+                        usernameController,
+                        (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter username';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      CustomTextField.buildTextField(
+                        "Password",
+                        widgetProvider.controller,
+                        (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter password';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        "Slide to Generate Password",
+                        style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                        textAlign: TextAlign.left,
+                      ),
+                      CustomSlider.customSlider(context),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                              onPressed: () {
+                                widgetProvider.selectedValue = null;
+                                widgetProvider.isPlatformNameVisible = false;
+
+                                Navigator.pop(context);
+                              },
+                              child: const Text(
+                                "Cancel",
+                                style: TextStyle(color: Colors.white),
+                              )),
+                          TextButton(
+                              onPressed: () async {
+                                if (_formKey.currentState!.validate()) {
+                                  if (widgetProvider.selectedValue != null &&
+                                      usernameController.text.isNotEmpty) {
+                                    if (widgetProvider.selectedValue ==
+                                            "Others" &&
+                                        platformController.text.isNotEmpty) {
+                                      bool isAdded =
+                                          await AddDataToHive.addData(
+                                        platformController.text.trim(),
+                                        widgetProvider.selectedValue!,
+                                        usernameController.text,
+                                        widgetProvider.controller.text,
+                                      );
+                                      if (isAdded) {
+                                        widgetProvider.selectedValue = null;
+                                        widgetProvider.isPlatformNameVisible =
+                                            false;
+                                        Navigator.pop(context);
+                                      }
+                                    } else if (widgetProvider.selectedValue !=
+                                        "Others") {
+                                      bool isAdded =
+                                          await AddDataToHive.addData(
+                                        platformController.text.trim(),
+                                        widgetProvider.selectedValue!,
+                                        usernameController.text,
+                                        widgetProvider.controller.text,
+                                      );
+                                      if (isAdded) {
+                                        Navigator.pop(context);
+                                        widgetProvider.selectedValue = null;
+                                        widgetProvider.isPlatformNameVisible =
+                                            false;
+                                      }
+                                    } else {
+                                      Fluttertoast.showToast(
+                                          msg: "Please specify platform",
+                                          fontSize: 20,
+                                          backgroundColor: Colors.red,
+                                          textColor: Colors.black,
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.BOTTOM);
+                                    }
+                                  }
+                                  screenProvider.setPlatforms();
+                                  await UploadToCloud().uploadToCloud();
+                                  SharedPreferences prefs =
+                                      await SharedPreferences.getInstance();
+                                  prefs.setBool("willBeUpdated", true);
+                                }
+                              },
+                              child: const Text(
+                                "Done",
+                                style: TextStyle(color: Colors.white),
+                              )),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),

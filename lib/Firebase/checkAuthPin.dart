@@ -26,7 +26,7 @@ class CheckPin {
 
       final String encryptedCheckPinCorrect = dataMap['dummy']['test'];
       print(encryptedCheckPinCorrect);
-      if ("cryptkey" ==
+      if (FirebaseAuth.instance.currentUser?.uid ==
           DataEncryption().checkDecryption(pin, encryptedCheckPinCorrect)) {
         isPinCorrect = true;
       }

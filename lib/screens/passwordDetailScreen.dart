@@ -5,7 +5,6 @@ import 'package:cryptkey/data/uploadToCloud.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/utils/mobileAuth.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
-import 'package:cryptkey/widgets/confirmPin.dart';
 import 'package:cryptkey/widgets/customIcon.dart';
 import 'package:cryptkey/widgets/editAccountDialog.dart';
 import 'package:cryptkey/widgets/showConfirmationwidget.dart';
@@ -47,10 +46,14 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
     }
   }
 
+  late BuildContext parentContext;
+
   @override
   void initState() {
     updateWhileInternetConnection();
-    WidgetsBinding.instance.addPostFrameCallback((_) {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      parentContext = context;
+    });
     numberofAccounts = ScreenProvider().numberOfAccounts(widget.platformName);
     isVisibleList = List.generate(numberofAccounts, (index) => false);
 
@@ -64,62 +67,67 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 2, 18, 46),
-          leading: IconButton(
-            onPressed: () {
-              final screenProvider =
-                  Provider.of<ScreenProvider>(context, listen: false);
-              screenProvider.setPlatforms();
-              pop();
-            },
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-          ),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 2, 18, 46),
+        leading: IconButton(
+          onPressed: () {
+            final screenProvider =
+                Provider.of<ScreenProvider>(context, listen: false);
+            screenProvider.setPlatforms();
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
         ),
-        body: Consumer<ScreenProvider>(
-            builder: (context, ScreenProvider provider, child) {
+      ),
+      body: Consumer<ScreenProvider>(
+        builder: (context, ScreenProvider provider, child) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
                 color: const Color.fromARGB(255, 2, 18, 46),
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(screenWidth * 0.05),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Hero(
                       tag: widget.platformName,
                       child: Container(
-                        width: 100,
-                        height: 100,
+                        width: screenWidth * 0.25,
+                        height: screenWidth * 0.25,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(50),
+                          borderRadius:
+                              BorderRadius.circular(screenWidth * 0.125),
                         ),
-                        child: CustomIcon()
-                            .customIcon(widget.platformName.toLowerCase(), 60),
+                        child: CustomIcon().customIcon(
+                            widget.platformName.toLowerCase(),
+                            screenWidth * 0.15),
                       ),
                     ),
-                    const SizedBox(width: 20),
+                    SizedBox(width: screenWidth * 0.05),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             widget.platformName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
-                              fontSize: 30,
+                              fontSize: screenWidth * 0.075,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: screenHeight * 0.01),
                           Text(
                             "$numberofAccounts Accounts",
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
-                              fontSize: 15,
+                              fontSize: screenWidth * 0.0375,
                             ),
                           ),
                         ],
@@ -128,9 +136,7 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                   ],
                 ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
+              SizedBox(height: screenHeight * 0.02),
               Expanded(
                 child: ListView.builder(
                   shrinkWrap: true,
@@ -138,106 +144,122 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                   itemBuilder: (context, index) {
                     final box = Boxes.getData();
                     final data = box.getAt(platformIndex[index]);
-                    // Replace this with your list item widget
                     return Slidable(
                       endActionPane: ActionPane(
-                          extentRatio: 1,
-                          motion: const StretchMotion(),
-                          children: [
-                            SlidableAction(
-                              backgroundColor: Colors.white,
-                              onPressed: (context) async {
-                                if (await MobileAuth.authenticate(
-                                        "Authenticate to Edit Password") ||
-                                    ((await showConfirmPinDialog(context,
-                                            provider.screenpin ?? "")) ??
-                                        false)) {
-                                  EditAccountWidget().editAccountWidget(
+                        extentRatio: 0.5,
+                        motion: const StretchMotion(),
+                        children: [
+                          SlidableAction(
+                            backgroundColor: Colors.white,
+                            onPressed: (context) async {
+                              if (await MobileAuth.authenticate(
+                                  "Authenticate to Edit Password")) {
+                                showDialog(
+                                  context: parentContext,
+                                  builder: (context) {
+                                    return EditAccountWidget()
+                                        .editAccountWidget(
                                       context,
                                       platformIndex[index],
                                       data!.platform,
                                       data.platformName,
                                       data.username,
-                                      data.password);
+                                      data.password,
+                                    );
+                                  },
+                                );
+                                UploadToCloud().uploadToCloud();
+                              }
+                            },
+                            icon: Icons.edit,
+                          ),
+                          SlidableAction(
+                            backgroundColor: Colors.red,
+                            onPressed: (context) async {
+                              if (await MobileAuth.authenticate(
+                                  "Authenticate to Delete Account")) {
+                                if (mounted) {
+                                  final shouldDelete =
+                                      await ShowConfirmationWidget
+                                          .showConfirmationDialog(
+                                    parentContext,
+                                    "Delete User",
+                                    "Are you sure you want to delete this user?",
+                                  );
 
-                                  UploadToCloud().uploadToCloud();
-                                }
-                              },
-                              icon: Icons.edit,
-                            ),
-                            SlidableAction(
-                              backgroundColor: Colors.red,
-                              onPressed: (context) async {
-                                if (await MobileAuth.authenticate(
-                                        "Authenticate to Delete Account") ||
-                                    ((await showConfirmPinDialog(context,
-                                            provider.screenpin ?? "")) ??
-                                        false)) {
-                                  if (await ShowConfirmationWidget
-                                      .showConfirmationDialog(
-                                          context,
-                                          "Delete User",
-                                          "Are you sure you want to delete this user?")) {
+                                  if (shouldDelete && mounted) {
                                     box.deleteAt(platformIndex[index]);
                                     ToastMessage.showToast("User Deleted");
 
-                                    numberofAccounts = ScreenProvider()
+                                    numberofAccounts = provider
                                         .numberOfAccounts(widget.platformName);
 
                                     if (numberofAccounts == 0) {
+                                      provider.setPlatforms();
                                       pop();
                                     }
 
                                     isVisibleList = List.generate(
                                         numberofAccounts, (index) => false);
-
                                     platformIndex = platformData()
                                         .getPlatformData(widget.platformName);
 
                                     provider.updateui();
-
                                     ToastMessage.showToast("User Deleted");
                                   }
                                 }
-                              },
-                              icon: Icons.delete,
-                              label: "Delete",
-                            )
-                          ]),
+                              }
+                            },
+                            icon: Icons.delete,
+                            // label: "Delete",
+                          ),
+                        ],
+                      ),
                       child: Container(
-                        margin: const EdgeInsets.all(10),
-                        padding: const EdgeInsets.all(10),
+                        margin: EdgeInsets.all(screenWidth * 0.025),
+                        padding: EdgeInsets.all(screenWidth * 0.025),
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(255, 2, 27, 70),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius:
+                              BorderRadius.circular(screenWidth * 0.05),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 20, right: 20),
-                              child: Text(
-                                data!.username,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: data.username.length > 25 ? 18 : 20,
-                                  fontWeight: FontWeight.bold,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.05),
+                              child: InkWell(
+                                onTap: () {
+                                  Clipboard.setData(
+                                          ClipboardData(text: data.username))
+                                      .then((value) {
+                                    ToastMessage.showToast(
+                                        "Username copied to clipboard");
+                                  }).onError((error, stackTrace) {
+                                    ToastMessage.showToast(
+                                        "Failed to copy username");
+                                  });
+                                },
+                                child: Text(
+                                  data!.username,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: screenWidth * 0.05,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              height: 10,
-                            ),
+                            SizedBox(height: screenHeight * 0.01),
                             Container(
-                              padding: const EdgeInsets.only(
-                                left: 20,
-                                right: 20,
-                              ),
-                              margin:
-                                  const EdgeInsets.only(left: 20, right: 20),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.05),
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.05),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius:
+                                    BorderRadius.circular(screenWidth * 0.05),
                                 color: Colors.white.withOpacity(0.1),
                               ),
                               child: Row(
@@ -251,8 +273,9 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                                           : data.password
                                               .replaceAll(RegExp(r"."), "*"),
                                       style: TextStyle(
-                                        fontSize:
-                                            data.password.length > 25 ? 15 : 13,
+                                        fontSize: data.password.length > 25
+                                            ? screenWidth * 0.0375
+                                            : screenWidth * 0.0325,
                                         color: Colors.white,
                                       ),
                                     ),
@@ -265,18 +288,17 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                                       color: Colors.white,
                                     ),
                                     onPressed: () async {
-                                      if (await MobileAuth.authenticate(
-                                              "Authenticate to See Password") ||
-                                          ((await showConfirmPinDialog(context,
-                                                  provider.screenpin ?? "")) ??
-                                              false)) {
+                                      if (!isVisibleList[index]) {
+                                        if (await MobileAuth.authenticate(
+                                            "Authenticate to See Password")) {
+                                          isVisibleList =
+                                              provider.updatePasswordVisibility(
+                                                  isVisibleList, index);
+                                        }
+                                      } else {
                                         isVisibleList =
                                             provider.updatePasswordVisibility(
                                                 isVisibleList, index);
-                                      } else {
-                                        (await showConfirmPinDialog(context,
-                                                provider.screenpin ?? "")) ??
-                                            false;
                                       }
                                     },
                                   ),
@@ -287,27 +309,23 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
                                     ),
                                     onPressed: () async {
                                       if (await MobileAuth.authenticate(
-                                              "Authenticate to Copy Password") ||
-                                          ((await showConfirmPinDialog(context,
-                                                  provider.screenpin ?? "")) ??
-                                              false)) {
+                                          "Authenticate to Copy Password")) {
                                         Clipboard.setData(ClipboardData(
                                                 text: data.password))
-                                            .then((value) =>
-                                                ToastMessage.showToast(
-                                                    "Copied to clipboard"))
-                                            .onError((error, stackTrace) =>
-                                                ToastMessage.showToast(
-                                                    "Failed to copy"));
+                                            .then((value) {
+                                          ToastMessage.showToast(
+                                              "Copied to clipboard");
+                                        }).onError((error, stackTrace) {
+                                          ToastMessage.showToast(
+                                              "Failed to copy");
+                                        });
                                       }
                                     },
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(
-                              height: 10,
-                            ),
+                            SizedBox(height: screenHeight * 0.01),
                           ],
                         ),
                       ),
@@ -317,6 +335,8 @@ class _PasswordDetailsScreenState extends State<PasswordDetailsScreen> {
               ),
             ],
           );
-        }));
+        },
+      ),
+    );
   }
 }

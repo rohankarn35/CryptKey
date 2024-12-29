@@ -1,21 +1,19 @@
+import 'package:cryptkey/Firebase/checkAuthPin.dart';
+import 'package:cryptkey/Firebase/cloudstore.dart';
+import 'package:cryptkey/Firebase/dummyTestData.dart';
 import 'package:cryptkey/utils/navigation.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
+import '../screens/biometricPage.dart';
 import '../widgets/custinShakeAnimation.dart';
 
-// ignore: must_be_immutable
 class PinScreen extends StatefulWidget {
-  final Future<bool> Function(String)?
-      onValidatePin; // Add callback for PIN validation
-  final Widget toNavigate;
-  bool isSetup;
-
+  final bool doesExist;
   PinScreen({
     Key? key,
-    required this.onValidatePin,
-    required this.toNavigate,
-    this.isSetup = false,
+    required this.doesExist,
   }) : super(key: key);
 
   @override
@@ -26,19 +24,18 @@ class _PinScreenState extends State<PinScreen> {
   final TextEditingController _pinController = TextEditingController();
   final shakeKey = GlobalKey<ShakeWidgetState>();
   List<Color> _borderColors = List.filled(4, Colors.white38);
-  bool _isLoading = false; // Add loading state
+  bool _isLoading = false;
 
   @override
   void initState() {
+    print(widget.doesExist);
     super.initState();
-    _pinController.addListener(() {
-      _updateBorderColors();
-    });
+    _pinController.addListener(_updateBorderColors);
   }
 
   @override
   void dispose() {
-    _pinController.removeListener(() {});
+    _pinController.removeListener(_updateBorderColors);
     _pinController.dispose();
     super.dispose();
   }
@@ -54,56 +51,43 @@ class _PinScreenState extends State<PinScreen> {
   }
 
   Future<void> _onSubmit() async {
+    bool isPinCorrect = false;
     if (_pinController.text.length == 4) {
-      setState(() {
-        _isLoading = true; // Set loading state to true
-      });
+      final String _pin = _pinController.text;
+      setState(() => _isLoading = true);
+      try {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString("pin", _pin);
 
-      bool isValid = widget.onValidatePin == null
-          ? true
-          : await widget.onValidatePin!(_pinController.text);
-
-      setState(() {
-        _isLoading = false; // Set loading state to false
-      });
-
-      if (isValid) {
-        print('PIN Submitted: ${_pinController.text}');
-        if (widget.onValidatePin == null || widget.isSetup) {
-          navigateToPage(context, widget.toNavigate);
+        if (widget.doesExist) {
+          isPinCorrect = await CheckPin().checkPin(_pin);
         } else {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => widget.toNavigate));
+          await DummyTestData().dummyData(widget.doesExist);
+          await CloudFirestoreService().addUserToDatabase();
+          isPinCorrect = true;
         }
 
-        // Handle successful PIN submission logic
-      } else {
-        print('Invalid PIN');
-        shakeKey.currentState?.shake();
+        if (isPinCorrect) {
+          navigateToPage(context, BiometricPage());
+        } else {
+          _showInvalidPinFeedback();
+        }
+      } catch (e) {
+        print("something went wrong in try catch ${e.toString()}");
 
-        // Set all borders to red for error feedback
-        setState(() {
-          _borderColors = List.filled(4, Colors.red);
-        });
-
-        // After 1 second, reset border colors to reflect filled or unfilled state
-        Timer(const Duration(seconds: 1), () {
-          _updateBorderColors();
-        });
+        _showInvalidPinFeedback();
+      } finally {
+        setState(() => _isLoading = false);
       }
     } else {
-      shakeKey.currentState?.shake();
-
-      // Set all borders to red for error feedback
-      setState(() {
-        _borderColors = List.filled(4, Colors.red);
-      });
-
-      // After 1 second, reset border colors to reflect filled or unfilled state
-      Timer(const Duration(seconds: 1), () {
-        _updateBorderColors();
-      });
+      _showInvalidPinFeedback();
     }
+  }
+
+  void _showInvalidPinFeedback() {
+    shakeKey.currentState?.shake();
+    setState(() => _borderColors = List.filled(4, Colors.red));
+    Timer(const Duration(seconds: 1), _updateBorderColors);
   }
 
   @override
@@ -123,12 +107,9 @@ class _PinScreenState extends State<PinScreen> {
             children: List.generate(4, (index) {
               return PinCodeField(
                 pinController: _pinController,
-                pin: _pinController.text,
                 pinCodeFieldIndex: index,
-                theme: PinTheme(keysColor: Colors.white),
                 fieldSize: screenWidth * 0.15,
-                borderColor:
-                    _borderColors[index], // Pass border color to PinCodeField
+                borderColor: _borderColors[index],
               );
             }),
           ),
@@ -137,9 +118,11 @@ class _PinScreenState extends State<PinScreen> {
         CustomKeyboard(
           controller: _pinController,
           maxLength: 4,
-          onSubmit: _onSubmit,
+          onSubmit: () async {
+            await _onSubmit();
+          },
           keySize: screenWidth * 0.18,
-          isLoading: _isLoading, // Pass loading state to CustomKeyboard
+          isLoading: _isLoading,
         ),
       ],
     );
@@ -151,7 +134,7 @@ class CustomKeyboard extends StatelessWidget {
   final int maxLength;
   final VoidCallback onSubmit;
   final double keySize;
-  final bool isLoading; // Add loading state
+  final bool isLoading;
 
   const CustomKeyboard({
     Key? key,
@@ -159,7 +142,7 @@ class CustomKeyboard extends StatelessWidget {
     required this.maxLength,
     required this.onSubmit,
     required this.keySize,
-    required this.isLoading, // Initialize loading state
+    required this.isLoading,
   }) : super(key: key);
 
   void _onKeyPressed(String key) {
@@ -197,29 +180,25 @@ class CustomKeyboard extends StatelessWidget {
 
   Widget _buildKey(String key) {
     return InkWell(
-      onTap:
-          isLoading ? null : () => _onKeyPressed(key), // Disable tap if loading
+      onTap: isLoading ? null : () => _onKeyPressed(key),
       child: Container(
-        margin: EdgeInsets.all(0),
         alignment: Alignment.center,
         width: key == "Done" ? keySize * 1.15 : keySize,
         height: keySize,
         decoration: BoxDecoration(
           color: Colors.transparent,
           border: Border.all(color: Colors.black),
-          borderRadius: BorderRadius.circular(0),
         ),
         child: key == 'Done' && isLoading
-            ? CircularProgressIndicator(
-                color: Colors.white,
-              ) // Show loading indicator
+            ? CircularProgressIndicator(color: Colors.white)
             : FittedBox(
                 child: Text(
                   key,
                   style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold),
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
       ),
@@ -228,21 +207,17 @@ class CustomKeyboard extends StatelessWidget {
 }
 
 class PinCodeField extends StatelessWidget {
-  final String pin;
   final int pinCodeFieldIndex;
-  final PinTheme theme;
   final double fieldSize;
   final TextEditingController pinController;
-  final Color borderColor; // New property for border color
+  final Color borderColor;
 
   const PinCodeField({
     Key? key,
-    required this.pin,
     required this.pinCodeFieldIndex,
-    required this.theme,
     required this.fieldSize,
     required this.pinController,
-    required this.borderColor, // Initialize border color
+    required this.borderColor,
   }) : super(key: key);
 
   @override
@@ -255,10 +230,10 @@ class PinCodeField extends StatelessWidget {
       width: fieldSize,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: borderColor)), // Use border color passed as argument
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: borderColor),
+      ),
       child: isDigitEntered
           ? Center(
               child: Text(
@@ -273,10 +248,4 @@ class PinCodeField extends StatelessWidget {
           : const SizedBox(),
     );
   }
-}
-
-class PinTheme {
-  final Color keysColor;
-
-  PinTheme({required this.keysColor});
 }

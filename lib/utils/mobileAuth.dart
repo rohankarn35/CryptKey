@@ -17,7 +17,7 @@ class MobileAuth {
           sensitiveTransaction: true,
           useErrorDialogs: false,
           stickyAuth: true,
-          biometricOnly: true,
+          biometricOnly: false,
         ),
       );
     } catch (e) {

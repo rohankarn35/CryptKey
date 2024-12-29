@@ -18,7 +18,7 @@ class DeveloperCard extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               image: DecorationImage(
-                image: AssetImage("assets/images/RohanKarn (2)-min.png"),
+                image: AssetImage("assets/images/devprofile.png"),
                 fit: BoxFit.contain,
               ),
             ),

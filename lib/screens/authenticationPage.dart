@@ -1,4 +1,3 @@
-import 'package:cryptkey/Firebase/cloudstore.dart';
 import 'package:cryptkey/Firebase/firebaseLogin.dart';
 import 'package:cryptkey/Firebase/firebaseLogout.dart';
 import 'package:cryptkey/provider/screenProvider.dart';
@@ -13,6 +12,8 @@ import 'package:jumping_dot/jumping_dot.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/trackpage.dart';
+
 class AuthenticationPage extends StatefulWidget {
   const AuthenticationPage({super.key});
 
@@ -25,6 +26,8 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   @override
   void initState() {
     FirebaseLogout.logout();
+    savePageState("AuthenticationPage");
+
     super.initState();
   }
 
@@ -128,16 +131,12 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                     await SharedPreferences.getInstance();
                                 prefs.setBool('isFirst', true);
                                 if (FirebaseAuth.instance.currentUser != null) {
-                                  final bool doesExist =
-                                      await CloudFirestoreService()
-                                          .checkAndAddUser();
                                   if (context.mounted) {
                                     Navigator.pushReplacement(
                                         context,
                                         AnimatedRouteBuilder(
-                                            anotherPage: SetEncryptionPin(
-                                          doesExist: doesExist,
-                                        )).animatedRoute());
+                                                anotherPage: SetEncryptionPin())
+                                            .animatedRoute());
                                   }
                                 } else {
                                   ToastMessage.showToast("An error occurred");

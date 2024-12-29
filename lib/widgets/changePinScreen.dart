@@ -25,7 +25,6 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
   @override
   void initState() {
     super.initState();
-    print("the pin is ${widget.oldPin}");
   }
 
   @override
@@ -75,6 +74,7 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
                         )
                       : OutlinedButton(
                           onPressed: () async {
+                            FocusScope.of(context).unfocus();
                             await _handleChangePin();
                           },
                           style: OutlinedButton.styleFrom(

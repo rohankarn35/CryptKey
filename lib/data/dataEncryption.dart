@@ -1,20 +1,21 @@
 import 'dart:typed_data';
 
 import 'package:cryptkey/data/firebaseModels.dart';
+import 'package:cryptkey/secrets/secretDatatoencrypt.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DataEncryption {
+  final secretData = FirebaseAuth.instance.currentUser!.uid;
   Future<String> encrypt(String data) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String pin = prefs.getString('pin') ?? "8523";
-      print("ecn pin $pin");
+      final String pin = prefs.getString('pin')!;
+
       final String plainText = data;
-      String uid = FirebaseAuth.instance.currentUser!.uid;
-      String email = FirebaseAuth.instance.currentUser!.email!;
-      String uidstring = uid.substring(0, 20);
+      String email = secretNumber;
+      String uidstring = secretData.substring(0, 20);
       String secretkey = uidstring + pin + email.substring(0, 8);
 
       final key = Key.fromUtf8(secretkey);
@@ -57,10 +58,9 @@ class DataEncryption {
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String pin = prefs.getString('pin') ?? "cryptkey";
-      String uid = FirebaseAuth.instance.currentUser!.uid;
-      String email = FirebaseAuth.instance.currentUser!.email!;
-      String uidstring = uid.substring(0, 20);
+      final String pin = prefs.getString('pin')!;
+      String email = secretNumber;
+      String uidstring = secretData.substring(0, 20);
       String secretkey = uidstring + pin + email.substring(0, 8);
 
       final key = Key.fromUtf8(secretkey);
@@ -78,9 +78,8 @@ class DataEncryption {
 
   String checkDecryption(String pin, String data) {
     try {
-      String uid = FirebaseAuth.instance.currentUser!.uid;
-      String email = FirebaseAuth.instance.currentUser!.email!;
-      String uidstring = uid.substring(0, 20);
+      String email = secretNumber;
+      String uidstring = secretData.substring(0, 20);
       String secretkey = uidstring + pin + email.substring(0, 8);
 
       final key = Key.fromUtf8(secretkey);
@@ -89,6 +88,7 @@ class DataEncryption {
       final encrypter = Encrypter(AES(key));
 
       final decrypted = encrypter.decrypt64(data, iv: iv);
+      print("the descrypted is $decrypted");
 
       return decrypted;
     } catch (e) {

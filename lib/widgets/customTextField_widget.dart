@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CustomTextField {
-  static Widget buildTextField(
-    String label,
-    TextEditingController? controller,
-
-  ) {
+  static Widget buildTextField(String label, TextEditingController? controller,
+      String? Function(String?)? validator) {
     return TextFormField(
+      validator: validator,
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle:  TextStyle(
+        labelStyle: TextStyle(
           color: Colors.white.withOpacity(0.3),
           fontSize: 14,
         ),
@@ -26,10 +24,9 @@ class CustomTextField {
             color: Colors.white,
           ),
         ),
-     
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),
-          borderSide:  BorderSide(
+          borderSide: BorderSide(
             color: Colors.white.withOpacity(0.5),
           ),
         ),
@@ -39,8 +36,6 @@ class CustomTextField {
         fontSize: 14,
       ),
       cursorColor: Colors.white,
-      
-      
     );
   }
 }

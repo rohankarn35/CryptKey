@@ -8,28 +8,40 @@ class DummyTestData {
   Future<void> dummyData(bool doesExist) async {
     try {
       if (!isGuestUser()) {
-        final CollectionReference _collectionReference =
-            FirebaseFirestore.instance.collection('cryptkey');
-        // Check if the user is already registered in Firestore
-        final String data = await DataEncryption().encrypt("cryptkey");
-        if (doesExist) {
-          await _collectionReference
-              .doc(FirebaseAuth.instance.currentUser!.uid)
-              .update({"dummy.test": data});
-          return; // Exit the method
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) {
+          Fluttertoast.showToast(msg: "User not logged in");
+          return;
         }
 
-        // If the user document doesn't exist, add dummy data
+        final CollectionReference _collectionReference =
+            FirebaseFirestore.instance.collection('cryptkey');
 
-        await _collectionReference
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .set({
+        // // Logging for debugging
+        // print("Checking for the 'cryptkey' collection and user document...");
+        final secretData = user.uid;
+
+        final String secret = secretData;
+        final String data = await DataEncryption().encrypt(secret);
+
+        if (doesExist) {
+          print("Updating existing document for UID: ${user.uid}");
+          await _collectionReference.doc(user.uid).set({
+            "dummy": {"test": data}
+          }, SetOptions(merge: true)); // Merge to update only this field
+          print("Document updated successfully.");
+          return;
+        }
+
+        print("Creating new document for UID: ${user.uid}");
+        await _collectionReference.doc(user.uid).set({
           "dummy": {"test": data}
         });
+        print("Document created successfully.");
       }
-    } catch (e) {
-      Fluttertoast.showToast(msg: "Something went wrong");
-      rethrow;
+    } catch (e, stackTrace) {
+      Fluttertoast.showToast(msg: "Something went wrong: $e");
+      print("Error: $e\nStackTrace: $stackTrace");
     }
   }
 }
