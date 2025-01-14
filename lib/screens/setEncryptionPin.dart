@@ -1,4 +1,7 @@
 import 'package:cryptkey/Firebase/cloudstore.dart';
+import 'package:cryptkey/Firebase/firebaseLogout.dart';
+import 'package:cryptkey/screens/biometricPage.dart';
+import 'package:cryptkey/utils/navigation.dart';
 import 'package:cryptkey/widgets/pinPage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -33,25 +36,25 @@ class _SetEncryptionPinState extends State<SetEncryptionPin> {
     }
   }
 
-  // Future<bool> _onSubmit(String pin, bool doesExist) async {
-  //   try {
-  //     SharedPreferences prefs = await SharedPreferences.getInstance();
-  //     prefs.setString("pin", pin);
-  //     if (doesExist) {
-  //       await DummyTestData().dummyData(doesExist);
-  //       return true;
-  //     }
-  //     bool isPinCorrect = await CheckPin().checkPin(pin);
-  //     return isPinCorrect;
-  //   } catch (e) {
-  //     Fluttertoast.showToast(msg: "Something went wrong");
-  //     return false;
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: const Color.fromARGB(255, 2, 18, 46),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await FirebaseLogout.logout();
+              navigateToPage(context, BiometricPage());
+            },
+            child: const Text(
+              'Skip',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
       body: FutureBuilder<bool>(
         future: _doesUserExistFuture,
         builder: (context, snapshot) {
@@ -70,7 +73,7 @@ class _SetEncryptionPinState extends State<SetEncryptionPin> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                     Text(
                       doesExist
                           ? "Enter your Encryption Pin"

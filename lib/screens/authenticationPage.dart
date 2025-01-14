@@ -48,6 +48,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
       canPop: false,
       child: Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           backgroundColor: const Color.fromARGB(255, 2, 18, 46),
           actions: [
             TextButton(

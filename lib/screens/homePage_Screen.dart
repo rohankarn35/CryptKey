@@ -94,6 +94,7 @@ class _HomePageState extends State<HomePage> {
                   child: ClipOval(
                     child: !isGuestUser()
                         ? CachedNetworkImage(
+                            errorListener: (value) {},
                             width: 40,
                             height: 40,
                             imageUrl:
@@ -102,7 +103,7 @@ class _HomePageState extends State<HomePage> {
                                 (context, url, downloadProgress) =>
                                     SvgPicture.asset("assets/icons/others.svg"),
                             errorWidget: (context, url, error) =>
-                                const Icon(Icons.error),
+                                SvgPicture.asset("assets/icons/others.svg"),
                           )
                         : SvgPicture.asset(
                             "assets/icons/others.svg",

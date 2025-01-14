@@ -35,13 +35,16 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => ScreenProvider()),
         ],
         child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'CryptKey',
-            theme: ThemeData(
-              primaryColor: Colors.white,
-              scaffoldBackgroundColor: const Color.fromARGB(255, 2, 18, 46),
-            ),
-            home: UpgradeAlert(child: SplashScreen()))
+          debugShowCheckedModeBanner: false,
+          title: 'CryptKey',
+          theme: ThemeData(
+            primaryColor: Colors.white,
+            scaffoldBackgroundColor: const Color.fromARGB(255, 2, 18, 46),
+          ),
+          home: UpgradeAlert(
+            child: SplashScreen(),
+          ),
+        )
         // home: SetEncryptionPin(doesExist: true)),
         );
   }

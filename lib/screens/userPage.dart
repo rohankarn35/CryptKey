@@ -7,7 +7,9 @@ import 'package:cryptkey/provider/screenProvider.dart';
 import 'package:cryptkey/screens/authenticationPage.dart';
 import 'package:cryptkey/screens/setEncryptionPin.dart';
 import 'package:cryptkey/utils/clearSharedData.dart';
+import 'package:cryptkey/utils/hasInternet.dart';
 import 'package:cryptkey/utils/isGuestUser.dart';
+import 'package:cryptkey/utils/navigation.dart';
 import 'package:cryptkey/utils/toastMessage.dart';
 import 'package:cryptkey/widgets/changePinScreen.dart';
 import 'package:cryptkey/widgets/customTiles.dart';
@@ -83,195 +85,253 @@ class _UserPageState extends State<UserPage> {
           ),
           body: LayoutBuilder(
             builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        const SizedBox(width: 15),
-                        Hero(
-                          tag: 'user',
-                          child: ClipOval(
-                            child: !isGuestUser()
-                                ? CachedNetworkImage(
-                                    width: constraints.maxWidth * 0.2,
-                                    height: constraints.maxWidth * 0.2,
-                                    imageUrl: userPhoto,
-                                    progressIndicatorBuilder:
-                                        (context, url, downloadProgress) =>
-                                            CircularProgressIndicator(),
-                                    errorWidget: (context, url, error) =>
-                                        Image.asset('assets/icons/others.png'),
-                                  )
-                                : SvgPicture.asset(
-                                    "assets/icons/others.svg",
-                                    height: constraints.maxWidth * 0.1,
-                                    width: constraints.maxWidth * 0.1,
-                                    color: Colors.white,
-                                  ),
+              return provider.isLoading
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
-                        ),
-                        const SizedBox(width: 20),
-                        Flexible(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          const SizedBox(height: 20),
+                          const Text(
+                            "Almost there...",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          const SizedBox(height: 20),
+                          Row(
                             children: [
-                              Text(
-                                username,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: constraints.maxWidth * 0.062,
-                                  fontWeight: FontWeight.w400,
+                              const SizedBox(width: 15),
+                              Hero(
+                                tag: 'user',
+                                child: ClipOval(
+                                  child: !isGuestUser()
+                                      ? CachedNetworkImage(
+                                          width: constraints.maxWidth * 0.2,
+                                          height: constraints.maxWidth * 0.2,
+                                          imageUrl: userPhoto,
+                                          progressIndicatorBuilder: (context,
+                                                  url, downloadProgress) =>
+                                              CircularProgressIndicator(),
+                                          errorWidget: (context, url, error) =>
+                                              SvgPicture.asset(
+                                            "assets/icons/others.svg",
+                                            height: constraints.maxWidth * 0.1,
+                                            width: constraints.maxWidth * 0.1,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : SvgPicture.asset(
+                                          "assets/icons/others.svg",
+                                          height: constraints.maxWidth * 0.1,
+                                          width: constraints.maxWidth * 0.1,
+                                          color: Colors.white,
+                                        ),
                                 ),
                               ),
-                              const SizedBox(height: 10),
-                              Text(
-                                userEmail,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: constraints.maxWidth * 0.032,
+                              const SizedBox(width: 20),
+                              Flexible(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      username,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: constraints.maxWidth * 0.062,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      userEmail,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: constraints.maxWidth * 0.032,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Divider(color: Colors.white.withOpacity(0.3)),
-                    const SizedBox(height: 30),
-                    FirebaseAuth.instance.currentUser != null
-                        ? CustomTile().customTile(
-                            "Clear Data",
-                            "Clear all your data",
-                            Icons.circle_outlined,
-                            () async {
+                          const SizedBox(height: 20),
+                          Divider(color: Colors.white.withOpacity(0.3)),
+                          const SizedBox(height: 30),
+                          FirebaseAuth.instance.currentUser != null
+                              ? CustomTile().customTile(
+                                  "Clear Data",
+                                  "Clear all your data",
+                                  Icons.circle_outlined,
+                                  () async {
+                                    if (await hasInternetConnection()) {
+                                      if (!provider.isLoading) {
+                                        provider.isLoadingAuth(true);
+                                        try {
+                                          bool res = false;
+                                          if (await MobileAuth
+                                              .canAuthenticate()) {
+                                            res = await MobileAuth.authenticate(
+                                                "Confirm to Clear Data");
+                                          }
+                                          if (res &&
+                                              await ShowConfirmationWidget
+                                                  .showConfirmationDialog(
+                                                      context,
+                                                      "Clear Data",
+                                                      "Are you sure you want to clear all data?")) {
+                                            if (provider
+                                                .platformsList.isEmpty) {
+                                              ToastMessage.showToast(
+                                                  "No Data Found");
+                                            } else {
+                                              await CloudFirestoreService()
+                                                  .clearData();
+                                              ClearHiveData.clearData();
+                                              provider.emptyData();
+                                              ToastMessage.showToast(
+                                                  "Data Cleared");
+                                            }
+                                            pop();
+                                          } else {
+                                            ToastMessage.showToast(
+                                                "Cannot Clear Data");
+                                          }
+                                        } catch (e) {
+                                          ToastMessage.showToast(
+                                              "Unable to Clear Data");
+                                        } finally {
+                                          provider.isLoadingAuth(false);
+                                        }
+                                      }
+                                    } else {
+                                      ToastMessage.showToast(
+                                        "No internet connection",
+                                      );
+                                    }
+                                  },
+                                )
+                              : SizedBox(),
+                          FirebaseAuth.instance.currentUser != null
+                              ? CustomTile().customTile(
+                                  "Change Encryption Pin",
+                                  "Encryption Pin",
+                                  Icons.pin,
+                                  () async {
+                                    if (await hasInternetConnection()) {
+                                      if (!provider.isLoading) {
+                                        if (provider.encryptionpin != null &&
+                                            provider
+                                                .encryptionpin!.isNotEmpty) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ChangePinScreen(
+                                                        heading:
+                                                            "Change Encryption Pin",
+                                                        oldPin: provider
+                                                            .encryptionpin!)),
+                                          );
+                                        }
+                                      }
+                                    } else {
+                                      ToastMessage.showToast(
+                                        "No internet connection",
+                                      );
+                                    }
+                                  },
+                                )
+                              : SizedBox(),
+                          CustomTile().customTile(
+                              "Privacy Policy",
+                              "App Privacy Policy",
+                              Icons.privacy_tip_outlined, () async {
+                            if (!provider.isLoading) {
+                              const String url =
+                                  "https://rohankarn69.github.io/privacy_cryptkey/";
+                              if (!await launch(url)) {
+                                throw Exception('Could not launch $url');
+                              }
+                            }
+                          }),
+                          CustomTile().customTile("About", "Developer Details",
+                              Icons.details_outlined, () {
+                            showDeveloperCard(context);
+                          }),
+                          const SizedBox(height: 20),
+                          TextButton(
+                            onPressed: () async {
                               if (!provider.isLoading) {
                                 provider.isLoadingAuth(true);
                                 try {
-                                  bool res = false;
-                                  if (await MobileAuth.canAuthenticate()) {
-                                    res = await MobileAuth.authenticate(
-                                        "Confirm to Clear Data");
-                                  }
-                                  if (res &&
-                                      await ShowConfirmationWidget
-                                          .showConfirmationDialog(
-                                              context,
-                                              "Clear Data",
-                                              "Are you sure you want to clear all data?")) {
-                                    if (provider.platformsList.isEmpty) {
-                                      ToastMessage.showToast("No Data Found");
-                                    } else {
-                                      await CloudFirestoreService().clearData();
+                                  if (!isGuestUser()) {
+                                    if (!await hasInternetConnection()) {
+                                      ToastMessage.showToast(
+                                          "Please Check Your Internet");
+                                    } else if (await ShowConfirmationWidget
+                                        .showConfirmationDialog(
+                                            context,
+                                            "Logout",
+                                            "Do you want to logout?")) {
+                                      await UploadToCloud().uploadToCloud();
+                                      ClearSharedData().clearSharedData();
+                                      await FirebaseLogout.logout();
                                       ClearHiveData.clearData();
-                                      provider.emptyData();
-                                      ToastMessage.showToast("Data Cleared");
+                                      navigateToOtherScreen();
                                     }
-                                    pop();
                                   } else {
-                                    ToastMessage.showToast("Cannot Clear Data");
+                                    await LoginService.login();
+                                    SharedPreferences prefs =
+                                        await SharedPreferences.getInstance();
+                                    prefs.setBool('isFirst', true);
+                                    if (FirebaseAuth.instance.currentUser !=
+                                        null) {
+                                      // Navigator.pushReplacement(
+                                      //   context,
+                                      // );
+                                      navigateToPage(
+                                        context,
+                                        SetEncryptionPin(),
+                                      );
+                                    } else {
+                                      ToastMessage.showToast(
+                                          "An error occurred");
+                                    }
                                   }
-                                } catch (e) {
-                                  ToastMessage.showToast(
-                                      "Unable to Clear Data");
+                                } catch (error) {
+                                  ToastMessage.showToast("An error occurred");
                                 } finally {
                                   provider.isLoadingAuth(false);
                                 }
                               }
                             },
-                          )
-                        : SizedBox(),
-                    FirebaseAuth.instance.currentUser != null
-                        ? CustomTile().customTile("Change Encryption Pin",
-                            "Encryption Pin", Icons.pin, () {
-                            if (!provider.isLoading) {
-                              if (provider.encryptionpin != null &&
-                                  provider.encryptionpin!.isNotEmpty) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ChangePinScreen(
-                                          heading: "Change Encryption Pin",
-                                          oldPin: provider.encryptionpin!)),
-                                );
-                              }
-                            }
-                          })
-                        : SizedBox(),
-                    CustomTile().customTile(
-                        "Privacy Policy",
-                        "App Privacy Policy",
-                        Icons.privacy_tip_outlined, () async {
-                      if (!provider.isLoading) {
-                        const String url =
-                            "https://rohankarn69.github.io/privacy_cryptkey/";
-                        if (!await launch(url)) {
-                          throw Exception('Could not launch $url');
-                        }
-                      }
-                    }),
-                    CustomTile().customTile(
-                        "About", "Developer Details", Icons.details_outlined,
-                        () {
-                      showDeveloperCard(context);
-                    }),
-                    const SizedBox(height: 20),
-                    TextButton(
-                      onPressed: () async {
-                        if (!provider.isLoading) {
-                          provider.isLoadingAuth(true);
-                          try {
-                            if (!isGuestUser()) {
-                              if (!await InternetConnectionChecker()
-                                  .hasConnection) {
-                                ToastMessage.showToast(
-                                    "Please Check Your Internet");
-                              } else if (await ShowConfirmationWidget
-                                  .showConfirmationDialog(context, "Logout",
-                                      "Do you want to logout?")) {
-                                await UploadToCloud().uploadToCloud();
-                                ClearSharedData().clearSharedData();
-                                await FirebaseLogout.logout();
-                                ClearHiveData.clearData();
-                                navigateToOtherScreen();
-                              }
-                            } else {
-                              await LoginService.login();
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
-                              prefs.setBool('isFirst', true);
-                              if (FirebaseAuth.instance.currentUser != null) {
-                                Navigator.pushReplacement(
-                                    context,
-                                    AnimatedRouteBuilder(
-                                            anotherPage: SetEncryptionPin())
-                                        .animatedRoute());
-                              } else {
-                                ToastMessage.showToast("An error occurred");
-                              }
-                            }
-                          } catch (error) {
-                            ToastMessage.showToast("An error occurred");
-                          } finally {
-                            provider.isLoadingAuth(false);
-                          }
-                        }
-                      },
-                      child: Text(
-                        isGuestUser() ? "Connect Google Account" : "Logout",
-                        style: TextStyle(
-                            color: isGuestUser() ? Colors.white : Colors.red,
-                            fontSize: 17),
+                            child: Text(
+                              isGuestUser()
+                                  ? "Connect Google Account"
+                                  : "Logout",
+                              style: TextStyle(
+                                  color:
+                                      isGuestUser() ? Colors.white : Colors.red,
+                                  fontSize: 17),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              );
+                    );
             },
           ),
         );
